@@ -1,7 +1,5 @@
-import type { GoalLog } from '@/store/useAppStore';
-
 interface HeatmapStripProps {
-  logs: GoalLog[];
+  logs: { date: string; completed: boolean | null }[];
   days?: number;
 }
 
