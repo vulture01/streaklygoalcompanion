@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAppStore } from '@/store/useAppStore';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useProfile, useGoals } from '@/hooks/useSupabaseData';
+import { toast } from 'sonner';
 
 const steps = [
   { title: "What's your name?", subtitle: "Let's personalize your experience" },
@@ -17,29 +18,33 @@ const STARTER_GOALS = [
   { emoji: '🚫', name: 'No Sugar' },
 ];
 
-export default function OnboardingPage() {
-  const { setUserName, setOnboarded, addGoal } = useAppStore();
+interface Props {
+  onComplete: () => void;
+}
+
+export default function OnboardingPage({ onComplete }: Props) {
+  const { updateProfile } = useProfile();
+  const { addGoal } = useGoals();
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>(['Fitness', 'Learning']);
   const [wakeTime, setWakeTime] = useState('07:00');
+  const [loading, setLoading] = useState(false);
 
-  const handleFinish = () => {
-    setUserName(name || 'User');
-    selectedGoals.forEach((g, i) => {
+  const handleFinish = async () => {
+    setLoading(true);
+    await updateProfile({ name: name || 'User', wake_up_time: wakeTime });
+    for (const g of selectedGoals) {
       const starter = STARTER_GOALS.find(s => s.name === g);
-      addGoal({
-        id: `onboard-${i}`,
+      await addGoal({
         name: g,
         emoji: starter?.emoji || '🎯',
         type: 'boolean',
-        streak: 0,
-        bestStreak: 0,
-        paused: false,
-        logs: [],
       });
-    });
-    setOnboarded(true);
+    }
+    setLoading(false);
+    toast.success('Welcome aboard! 🎉');
+    onComplete();
   };
 
   const toggleGoal = (g: string) => {
@@ -53,7 +58,6 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Progress */}
       <div className="flex gap-2 px-6 pt-12">
         {steps.map((_, i) => (
           <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? 'gradient-primary' : 'bg-muted'}`} />
@@ -93,9 +97,7 @@ export default function OnboardingPage() {
                     key={g.name}
                     onClick={() => toggleGoal(g.name)}
                     className={`w-full flex items-center gap-3 p-4 rounded-lg border tap-target ${
-                      selectedGoals.includes(g.name)
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border bg-card'
+                      selectedGoals.includes(g.name) ? 'border-primary bg-primary/10' : 'border-border bg-card'
                     }`}
                   >
                     <span className="text-xl">{g.emoji}</span>
@@ -120,13 +122,13 @@ export default function OnboardingPage() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Bottom Button */}
       <div className="px-6 pb-10">
         <button
           onClick={next}
-          className="w-full py-4 rounded-lg gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 tap-target"
+          disabled={loading}
+          className="w-full py-4 rounded-lg gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 tap-target disabled:opacity-50"
         >
-          {step < 2 ? 'Continue' : 'Get Started'}
+          {loading ? 'Setting up...' : step < 2 ? 'Continue' : 'Get Started'}
           <ArrowRight size={18} />
         </button>
       </div>

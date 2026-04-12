@@ -14,7 +14,216 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      badges: {
+        Row: {
+          goal_id: string
+          id: string
+          milestone: number
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          goal_id: string
+          id?: string
+          milestone: number
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          goal_id?: string
+          id?: string
+          milestone?: number
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badges_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          best_streak: number
+          created_at: string
+          emoji: string
+          id: string
+          linked_goal_id: string | null
+          name: string
+          pause_reason: string | null
+          paused: boolean
+          reminder_time: string | null
+          streak: number
+          target: number | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_streak?: number
+          created_at?: string
+          emoji?: string
+          id?: string
+          linked_goal_id?: string | null
+          name: string
+          pause_reason?: string | null
+          paused?: boolean
+          reminder_time?: string | null
+          streak?: number
+          target?: number | null
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_streak?: number
+          created_at?: string
+          emoji?: string
+          id?: string
+          linked_goal_id?: string | null
+          name?: string
+          pause_reason?: string | null
+          paused?: boolean
+          reminder_time?: string | null
+          streak?: number
+          target?: number | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      logs: {
+        Row: {
+          completed: boolean
+          created_at: string
+          date: string
+          energy: string | null
+          goal_id: string
+          id: string
+          mood: string | null
+          note: string | null
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          energy?: string | null
+          goal_id: string
+          id?: string
+          mood?: string | null
+          note?: string | null
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          energy?: string | null
+          goal_id?: string
+          id?: string
+          mood?: string | null
+          note?: string | null
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logs_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          groq_api_key: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+          wake_up_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          groq_api_key?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id: string
+          wake_up_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          groq_api_key?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+          wake_up_time?: string | null
+        }
+        Relationships: []
+      }
+      todos: {
+        Row: {
+          completed: boolean
+          created_at: string
+          goal_id: string | null
+          id: string
+          priority: string
+          recurring: string | null
+          subtasks: Json | null
+          time_block: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          goal_id?: string | null
+          id?: string
+          priority?: string
+          recurring?: string | null
+          subtasks?: Json | null
+          time_block?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          goal_id?: string | null
+          id?: string
+          priority?: string
+          recurring?: string | null
+          subtasks?: Json | null
+          time_block?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todos_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

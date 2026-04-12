@@ -2,28 +2,28 @@ import { motion } from 'framer-motion';
 import { ProgressRing } from './ProgressRing';
 import { HeatmapStrip } from './HeatmapStrip';
 import { Flame, Pause } from 'lucide-react';
-import type { Goal } from '@/store/useAppStore';
+import type { Tables } from '@/integrations/supabase/types';
 import { useNavigate } from 'react-router-dom';
+
+type Goal = Tables<'goals'>;
+type Log = Tables<'logs'>;
 
 interface GoalCardProps {
   goal: Goal;
+  logs: Log[];
   index: number;
 }
 
-export function GoalCard({ goal, index }: GoalCardProps) {
+export function GoalCard({ goal, logs, index }: GoalCardProps) {
   const navigate = useNavigate();
 
-  const todayStr = new Date().toISOString().split('T')[0];
-  const todayLog = goal.logs.find((l) => l.date === todayStr);
-  const todayProgress = todayLog?.completed ? 100 : 0;
-
-  const last7 = goal.logs.filter((l) => {
+  const last7 = logs.filter((l) => {
     const d = new Date(l.date);
     const now = new Date();
     const diff = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
-    return diff < 7;
+    return diff < 7 && l.completed;
   });
-  const weekProgress = Math.round((last7.filter((l) => l.completed).length / 7) * 100);
+  const weekProgress = Math.round((last7.length / 7) * 100);
 
   return (
     <motion.div
@@ -51,9 +51,9 @@ export function GoalCard({ goal, index }: GoalCardProps) {
             <Flame size={12} className="text-primary" />
             <span>{goal.streak} day streak</span>
             <span className="text-border">•</span>
-            <span>Best: {goal.bestStreak}</span>
+            <span>Best: {goal.best_streak}</span>
           </div>
-          <HeatmapStrip logs={goal.logs} />
+          <HeatmapStrip logs={logs} />
         </div>
       </div>
     </motion.div>

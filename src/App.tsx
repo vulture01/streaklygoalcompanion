@@ -1,10 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { BottomNav } from "@/components/BottomNav";
-import { useAppStore } from "@/store/useAppStore";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useProfile, useGoals } from "@/hooks/useSupabaseData";
+import { useState, useEffect } from "react";
+import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
 import FocusPage from "./pages/FocusPage";
 import TodosPage from "./pages/TodosPage";
@@ -12,15 +15,54 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import ProfilePage from "./pages/ProfilePage";
 import GoalDetailPage from "./pages/GoalDetailPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import GroqSetupPage from "./pages/GroqSetupPage";
+import WeeklyReviewPage from "./pages/WeeklyReviewPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
   const location = useLocation();
-  const onboarded = useAppStore((s) => s.onboarded);
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
+  const { goals, loading: goalsLoading, seedDefaultGoals } = useGoals();
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
+  const [groqSetupDone, setGroqSetupDone] = useState<boolean | null>(null);
 
-  if (!onboarded) return <OnboardingPage />;
+  useEffect(() => {
+    if (!profileLoading && profile) {
+      setOnboarded(!!profile.name && profile.name !== '');
+      setGroqSetupDone(!!profile.groq_api_key);
+    }
+    if (!profileLoading && !profile && user) {
+      setOnboarded(false);
+    }
+  }, [profile, profileLoading, user]);
+
+  // Seed default goals on first login (when no goals exist yet and onboarding done)
+  useEffect(() => {
+    if (!goalsLoading && goals.length === 0 && onboarded && user) {
+      seedDefaultGoals();
+    }
+  }, [goalsLoading, goals.length, onboarded, user]);
+
+  if (authLoading || (user && profileLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return <AuthPage />;
+
+  if (onboarded === false) {
+    return <OnboardingPage onComplete={() => setOnboarded(true)} />;
+  }
+
+  if (onboarded && groqSetupDone === false) {
+    return <GroqSetupPage onComplete={() => setGroqSetupDone(true)} />;
+  }
 
   return (
     <>
@@ -32,6 +74,7 @@ function AppRoutes() {
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/goal/:id" element={<GoalDetailPage />} />
+          <Route path="/weekly-review" element={<WeeklyReviewPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AnimatePresence>
@@ -45,7 +88,9 @@ const App = () => (
     <TooltipProvider>
       <Sonner />
       <BrowserRouter>
-        <AppRoutes />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

@@ -2,11 +2,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageTransition } from '@/components/PageTransition';
 import { ProgressRing } from '@/components/ProgressRing';
 import { HeatmapStrip } from '@/components/HeatmapStrip';
-import { useAppStore } from '@/store/useAppStore';
-import { ArrowLeft, Flame, Sparkles, Pause, Play } from 'lucide-react';
-import { useState } from 'react';
+import { useGoals, useLogs, useBadges, useStreakCalculator } from '@/hooks/useSupabaseData';
+import { useGroqAI } from '@/hooks/useGroqAI';
+import { ArrowLeft, Flame, Sparkles, Pause, Play, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { BottomSheet } from '@/components/BottomSheet';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { ConfettiCelebration } from '@/components/ConfettiCelebration';
+import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts';
 
 const MOODS = ['💪', '😐', '😓'];
 const ENERGIES = ['High', 'Medium', 'Low'] as const;
@@ -14,67 +16,82 @@ const ENERGIES = ['High', 'Medium', 'Low'] as const;
 export default function GoalDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { goals, logGoal, updateGoal } = useAppStore();
-  const goal = goals.find((g) => g.id === id);
+  const { goals, updateGoal, refetch: refetchGoals } = useGoals();
+  const { logs, addLog, refetch: refetchLogs } = useLogs(id);
+  const { badges } = useBadges();
+  const { recalcStreak } = useStreakCalculator();
+  const { callGroq, loading: aiLoading } = useGroqAI();
   const [logOpen, setLogOpen] = useState(false);
   const [note, setNote] = useState('');
   const [mood, setMood] = useState('💪');
   const [energy, setEnergy] = useState<'High' | 'Medium' | 'Low'>('Medium');
+  const [suggestions, setSuggestions] = useState<string | null>(null);
+  const [prediction, setPrediction] = useState<string | null>(null);
+  const [celebration, setCelebration] = useState<number | null>(null);
+  const { checkAndAwardBadge } = useBadges();
 
-  if (!goal) return <div className="p-4 text-foreground">Goal not found</div>;
+  const goal = goals.find((g) => g.id === id);
+  const goalBadges = badges.filter(b => b.goal_id === id);
 
-  // Weekly chart data
   const weekData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
     const dateStr = d.toISOString().split('T')[0];
-    const log = goal.logs.find((l) => l.date === dateStr);
-    return {
-      day: d.toLocaleDateString('en', { weekday: 'short' }),
-      value: log?.completed ? 1 : 0,
-    };
+    const log = logs.find((l) => l.date === dateStr);
+    return { day: d.toLocaleDateString('en', { weekday: 'short' }), value: log?.completed ? 1 : 0 };
   });
 
   const weeklyPct = Math.round((weekData.filter(d => d.value).length / 7) * 100);
 
-  const handleLog = () => {
-    logGoal(goal.id, {
-      id: Date.now().toString(),
+  const fetchAI = useCallback(async () => {
+    if (!goal) return;
+    const last14 = logs.slice(0, 14).map(l => `${l.date}: mood=${l.mood}, energy=${l.energy}, note=${l.note || 'none'}`).join('\n');
+    const result = await callGroq('suggestions', last14);
+    setSuggestions(result);
+    const pred = await callGroq('prediction', `Current streak: ${goal.streak}, best: ${goal.best_streak}, weekly completion: ${weeklyPct}%`);
+    setPrediction(pred);
+  }, [goal, logs, weeklyPct]);
+
+  useEffect(() => {
+    if (goal && logs.length > 0 && !suggestions) fetchAI();
+  }, [goal, logs.length]);
+
+  const handleLog = async () => {
+    if (!goal) return;
+    await addLog({
+      goal_id: goal.id,
       date: new Date().toISOString().split('T')[0],
       note,
       mood,
       energy,
       completed: true,
     });
+    const { streak } = await recalcStreak(goal.id);
+    const awarded = await checkAndAwardBadge(goal.id, streak);
+    if (awarded) setCelebration(awarded);
+    await refetchGoals();
+    await refetchLogs();
     setNote('');
     setLogOpen(false);
   };
 
-  const daysToStreak30 = Math.max(0, 30 - goal.streak);
+  if (!goal) return <div className="p-4 text-foreground">Goal not found</div>;
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 pb-4 max-w-lg mx-auto">
-        {/* Header */}
+      <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate(-1)} className="tap-target">
-            <ArrowLeft size={22} className="text-foreground" />
-          </button>
+          <button onClick={() => navigate(-1)} className="tap-target"><ArrowLeft size={22} className="text-foreground" /></button>
           <span className="text-2xl">{goal.emoji}</span>
           <h1 className="text-xl font-bold text-foreground flex-1">{goal.name}</h1>
-          <button
-            onClick={() => updateGoal(goal.id, { paused: !goal.paused })}
-            className="tap-target flex items-center justify-center w-10 h-10 rounded-full bg-secondary"
-          >
+          <button onClick={() => updateGoal(goal.id, { paused: !goal.paused })}
+            className="tap-target flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
             {goal.paused ? <Play size={16} className="text-success" /> : <Pause size={16} className="text-warning" />}
           </button>
         </div>
 
-        {/* Stats Row */}
         <div className="flex items-center justify-around mb-6">
-          <div className="flex flex-col items-center">
-            <ProgressRing progress={weeklyPct} size={72} strokeWidth={5} label={`${weeklyPct}%`} sublabel="week" />
-          </div>
+          <ProgressRing progress={weeklyPct} size={72} strokeWidth={5} label={`${weeklyPct}%`} sublabel="week" />
           <div className="flex flex-col items-center gap-1">
             <Flame size={20} className="text-primary" />
             <span className="text-2xl font-bold text-foreground">{goal.streak}</span>
@@ -82,18 +99,30 @@ export default function GoalDetailPage() {
           </div>
           <div className="flex flex-col items-center gap-1">
             <span className="text-lg">🏆</span>
-            <span className="text-2xl font-bold text-foreground">{goal.bestStreak}</span>
+            <span className="text-2xl font-bold text-foreground">{goal.best_streak}</span>
             <span className="text-xs text-muted-foreground">Best</span>
           </div>
         </div>
 
-        {/* Heatmap */}
+        {/* Badges */}
+        {goalBadges.length > 0 && (
+          <div className="bg-card rounded-lg p-4 border border-border mb-4">
+            <h3 className="text-sm font-medium text-foreground mb-2">Badges Earned</h3>
+            <div className="flex gap-2 flex-wrap">
+              {goalBadges.map(b => (
+                <div key={b.id} className="px-3 py-1.5 rounded-full gradient-primary text-primary-foreground text-xs font-medium">
+                  🏆 {b.milestone}-day
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="bg-card rounded-lg p-4 border border-border mb-4">
           <h3 className="text-sm font-medium text-foreground mb-3">30-Day Activity</h3>
-          <HeatmapStrip logs={goal.logs} />
+          <HeatmapStrip logs={logs} />
         </div>
 
-        {/* Weekly Trend */}
         <div className="bg-card rounded-lg p-4 border border-border mb-4">
           <h3 className="text-sm font-medium text-foreground mb-3">This Week</h3>
           <ResponsiveContainer width="100%" height={120}>
@@ -110,35 +139,40 @@ export default function GoalDetailPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Progress Prediction */}
+        {/* Prediction */}
         <div className="bg-card rounded-lg p-4 border border-border mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={16} className="text-primary" />
             <h3 className="text-sm font-medium text-foreground">Prediction</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            At this rate, you'll hit a 30-day streak in <span className="text-foreground font-semibold">{daysToStreak30} days</span>. Keep going!
+            {prediction || `At this rate, you'll hit a 30-day streak in ${Math.max(0, 30 - goal.streak)} days.`}
           </p>
         </div>
 
-        {/* AI Suggestion Box */}
+        {/* AI Suggestions */}
         <div className="gradient-border bg-card rounded-lg p-4 mb-4 glow-violet">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={16} className="text-primary" />
             <h3 className="text-sm font-medium gradient-primary-text">AI Suggestions</h3>
+            <button onClick={fetchAI} disabled={aiLoading} className="ml-auto tap-target text-primary">
+              <RefreshCw size={14} className={aiLoading ? 'animate-spin' : ''} />
+            </button>
           </div>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>• Try logging earlier in the day — your completion rate is 40% higher before noon.</li>
-            <li>• Consider pairing this with your Learning goal for motivation boost.</li>
-          </ul>
-          <button className="mt-3 text-xs text-primary font-medium">↻ Refresh</button>
+          {suggestions ? (
+            <p className="text-sm text-muted-foreground whitespace-pre-line">{suggestions}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              {aiLoading ? 'Generating suggestions...' : 'Configure Groq API key for AI suggestions'}
+            </p>
+          )}
         </div>
 
         {/* Recent Logs */}
         <div className="mb-4">
           <h3 className="text-sm font-medium text-foreground mb-3">Recent Entries</h3>
           <div className="space-y-2">
-            {goal.logs.filter(l => l.completed).slice(0, 5).map((log) => (
+            {logs.filter(l => l.completed).slice(0, 5).map((log) => (
               <div key={log.id} className="bg-card rounded-lg p-3 border border-border">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-muted-foreground">{log.date}</span>
@@ -156,27 +190,15 @@ export default function GoalDetailPage() {
           </div>
         </div>
 
-        {/* Log Button */}
-        <button
-          onClick={() => setLogOpen(true)}
-          className="fixed bottom-24 right-4 w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-lg glow-violet z-40"
-        >
+        <button onClick={() => setLogOpen(true)}
+          className="fixed bottom-24 right-4 w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-lg glow-violet z-40">
           <span className="text-primary-foreground text-2xl">+</span>
         </button>
 
-        {/* Log Sheet */}
         <BottomSheet open={logOpen} onClose={() => setLogOpen(false)} title="Log Entry">
           <div className="space-y-4">
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">What did you do?</label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={3}
-                placeholder="Describe your progress..."
-                className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary resize-none"
-              />
-            </div>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="Describe your progress..."
+              className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary resize-none" />
             <div>
               <label className="text-sm text-muted-foreground mb-2 block">Mood</label>
               <div className="flex gap-3">
@@ -205,6 +227,7 @@ export default function GoalDetailPage() {
           </div>
         </BottomSheet>
       </div>
+      <ConfettiCelebration milestone={celebration} onDone={() => setCelebration(null)} />
     </PageTransition>
   );
 }
