@@ -32,7 +32,7 @@ function AppRoutes() {
   useEffect(() => {
     if (!profileLoading && profile) {
       setOnboarded(!!profile.name && profile.name !== '');
-      setGroqSetupDone(!!profile.groq_api_key);
+      setGroqSetupDone(hasGroqKey);
     }
     if (!profileLoading && !profile && user) {
       setOnboarded(false);
