@@ -21,7 +21,7 @@ export function useProfile() {
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, user_id, name, wake_up_time, created_at, updated_at')
       .eq('user_id', user.id)
       .single();
     setProfile(data);
