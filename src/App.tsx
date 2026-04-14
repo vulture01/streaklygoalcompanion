@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 function AppRoutes() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile, loading: profileLoading, hasGroqKey } = useProfile();
   const { goals, loading: goalsLoading, seedDefaultGoals } = useGoals();
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
   const [groqSetupDone, setGroqSetupDone] = useState<boolean | null>(null);
@@ -32,7 +32,7 @@ function AppRoutes() {
   useEffect(() => {
     if (!profileLoading && profile) {
       setOnboarded(!!profile.name && profile.name !== '');
-      setGroqSetupDone(!!profile.groq_api_key);
+      setGroqSetupDone(hasGroqKey);
     }
     if (!profileLoading && !profile && user) {
       setOnboarded(false);

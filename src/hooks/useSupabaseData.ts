@@ -14,17 +14,25 @@ const MILESTONES = [3, 7, 14, 30, 60, 100];
 
 export function useProfile() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Omit<Profile, 'groq_api_key'> | null>(null);
+  const [hasGroqKey, setHasGroqKey] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, user_id, name, wake_up_time, created_at, updated_at')
       .eq('user_id', user.id)
       .single();
     setProfile(data);
+    // Check if groq key exists without exposing its value to component state
+    const { data: keyCheck } = await supabase
+      .from('profiles')
+      .select('groq_api_key')
+      .eq('user_id', user.id)
+      .single();
+    setHasGroqKey(!!keyCheck?.groq_api_key);
     setLoading(false);
   }, [user]);
 
@@ -40,7 +48,7 @@ export function useProfile() {
     else await fetchProfile();
   };
 
-  return { profile, loading, updateProfile, refetch: fetchProfile };
+  return { profile, loading, hasGroqKey, updateProfile, refetch: fetchProfile };
 }
 
 export function useGoals() {
