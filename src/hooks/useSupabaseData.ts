@@ -14,7 +14,7 @@ const MILESTONES = [3, 7, 14, 30, 60, 100];
 
 export function useProfile() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Omit<Profile, 'groq_api_key'> | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async () => {
