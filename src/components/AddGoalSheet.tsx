@@ -77,7 +77,6 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
         <button onClick={handleSave} disabled={saving} className="w-full py-3.5 rounded-lg gradient-primary text-primary-foreground font-semibold tap-target disabled:opacity-50">
           {saving ? 'Creating...' : 'Create Goal'}
         </button>
-        </button>
       </div>
     </BottomSheet>
   );
