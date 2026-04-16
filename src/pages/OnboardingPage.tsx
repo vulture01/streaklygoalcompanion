@@ -6,16 +6,20 @@ import { toast } from 'sonner';
 
 const steps = [
   { title: "What's your name?", subtitle: "Let's personalize your experience" },
-  { title: "Set your first goal", subtitle: "What do you want to track daily?" },
+  { title: "Choose Your Goals", subtitle: "Select the areas you want to improve" },
   { title: "When do you wake up?", subtitle: "We'll set smart reminders for you" },
 ];
 
-const STARTER_GOALS = [
-  { emoji: '💪', name: 'Fitness' },
-  { emoji: '📚', name: 'Learning' },
-  { emoji: '🧘', name: 'Meditate' },
-  { emoji: '💧', name: 'Drink Water' },
-  { emoji: '🚫', name: 'No Sugar' },
+const GOAL_CATEGORIES = [
+  { emoji: '🏋️', name: 'Fitness & Gym', goalTitle: 'Build a consistent gym routine' },
+  { emoji: '📚', name: 'Study & Learning', goalTitle: 'Dedicate time to learning daily' },
+  { emoji: '💼', name: 'Career & Skills', goalTitle: 'Work on career development' },
+  { emoji: '🧘', name: 'Mental Health & Mindfulness', goalTitle: 'Practice mindfulness daily' },
+  { emoji: '💧', name: 'Health & Hydration', goalTitle: 'Stay hydrated throughout the day' },
+  { emoji: '😴', name: 'Sleep & Recovery', goalTitle: 'Maintain a healthy sleep schedule' },
+  { emoji: '🍎', name: 'Nutrition & Diet', goalTitle: 'Eat balanced and nutritious meals' },
+  { emoji: '💰', name: 'Finance & Savings', goalTitle: 'Track spending and save daily' },
+  { emoji: '📖', name: 'Reading', goalTitle: 'Read at least 20 minutes a day' },
 ];
 
 interface Props {
@@ -27,34 +31,54 @@ export default function OnboardingPage({ onComplete }: Props) {
   const { addGoal } = useGoals();
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
-  const [selectedGoals, setSelectedGoals] = useState<string[]>(['Fitness', 'Learning']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [customGoal, setCustomGoal] = useState('');
   const [wakeTime, setWakeTime] = useState('07:00');
   const [loading, setLoading] = useState(false);
 
   const handleFinish = async () => {
+    if (loading) return;
     setLoading(true);
     await updateProfile({ name: name || 'User', wake_up_time: wakeTime });
-    for (const g of selectedGoals) {
-      const starter = STARTER_GOALS.find(s => s.name === g);
+
+    // Create goals from selected categories
+    for (const catName of selectedCategories) {
+      const cat = GOAL_CATEGORIES.find(c => c.name === catName);
+      if (cat) {
+        await addGoal({
+          name: cat.goalTitle,
+          emoji: cat.emoji,
+          type: 'boolean',
+        });
+      }
+    }
+
+    // Create custom goal if provided
+    if (customGoal.trim()) {
       await addGoal({
-        name: g,
-        emoji: starter?.emoji || '🎯',
+        name: customGoal.trim(),
+        emoji: '🎯',
         type: 'boolean',
       });
     }
+
     setLoading(false);
     toast.success('Welcome aboard! 🎉');
     onComplete();
   };
 
-  const toggleGoal = (g: string) => {
-    setSelectedGoals(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]);
+  const toggleCategory = (name: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(name) ? prev.filter(x => x !== name) : [...prev, name]
+    );
   };
 
   const next = () => {
     if (step < 2) setStep(step + 1);
     else handleFinish();
   };
+
+  const canContinue = step === 0 || step === 2 || (step === 1); // step 1 is optional
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -71,7 +95,7 @@ export default function OnboardingPage({ onComplete }: Props) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -40 }}
           transition={{ duration: 0.25 }}
-          className="flex-1 flex flex-col px-6 pt-12"
+          className="flex-1 flex flex-col px-6 pt-12 overflow-y-auto"
         >
           <div className="mb-2">
             <Sparkles size={28} className="text-primary mb-4" />
@@ -79,7 +103,7 @@ export default function OnboardingPage({ onComplete }: Props) {
             <p className="text-sm text-muted-foreground">{steps[step].subtitle}</p>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center pb-20">
+          <div className="flex-1 flex flex-col justify-start pb-20 mt-6">
             {step === 0 && (
               <input
                 value={name}
@@ -92,18 +116,46 @@ export default function OnboardingPage({ onComplete }: Props) {
 
             {step === 1 && (
               <div className="space-y-3">
-                {STARTER_GOALS.map((g) => (
+                <div className="grid grid-cols-2 gap-3">
+                  {GOAL_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.name}
+                      onClick={() => toggleCategory(cat.name)}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border tap-target transition-all ${
+                        selectedCategories.includes(cat.name)
+                          ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                          : 'border-border bg-card hover:bg-muted'
+                      }`}
+                    >
+                      <span className="text-2xl">{cat.emoji}</span>
+                      <span className="text-xs font-medium text-foreground text-center leading-tight">{cat.name}</span>
+                    </button>
+                  ))}
+                  {/* Custom goal card */}
                   <button
-                    key={g.name}
-                    onClick={() => toggleGoal(g.name)}
-                    className={`w-full flex items-center gap-3 p-4 rounded-lg border tap-target ${
-                      selectedGoals.includes(g.name) ? 'border-primary bg-primary/10' : 'border-border bg-card'
+                    onClick={() => document.getElementById('custom-goal-input')?.focus()}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border tap-target transition-all ${
+                      customGoal.trim()
+                        ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                        : 'border-border bg-card hover:bg-muted'
                     }`}
                   >
-                    <span className="text-xl">{g.emoji}</span>
-                    <span className="text-foreground font-medium">{g.name}</span>
+                    <span className="text-2xl">🎯</span>
+                    <span className="text-xs font-medium text-foreground text-center leading-tight">Custom</span>
                   </button>
-                ))}
+                </div>
+                <input
+                  id="custom-goal-input"
+                  value={customGoal}
+                  onChange={(e) => setCustomGoal(e.target.value)}
+                  placeholder="Type your own goal..."
+                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary mt-2"
+                />
+                <p className="text-xs text-muted-foreground text-center">
+                  {selectedCategories.length === 0 && !customGoal.trim()
+                    ? 'You can skip this step — add goals later anytime'
+                    : `${selectedCategories.length + (customGoal.trim() ? 1 : 0)} goal(s) selected`}
+                </p>
               </div>
             )}
 
@@ -128,7 +180,7 @@ export default function OnboardingPage({ onComplete }: Props) {
           disabled={loading}
           className="w-full py-4 rounded-lg gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 tap-target disabled:opacity-50"
         >
-          {loading ? 'Setting up...' : step < 2 ? 'Continue' : 'Get Started'}
+          {loading ? 'Setting up...' : step === 1 && selectedCategories.length === 0 && !customGoal.trim() ? 'Skip' : step < 2 ? 'Continue' : 'Get Started'}
           <ArrowRight size={18} />
         </button>
       </div>
