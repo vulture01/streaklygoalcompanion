@@ -81,17 +81,27 @@ export default function HomePage() {
         </div>
 
         <div className="space-y-3 mb-6">
-          {goals.filter(g => !g.paused).map((goal, i) => (
-            <SwipeableCard
-              key={goal.id}
-              onSwipeRight={() => setLogGoalId(goal.id)}
-              onSwipeLeft={() => setPauseGoalId(goal.id)}
-              rightLabel="Log"
-              leftLabel="Pause"
-            >
-              <GoalCard goal={goal} logs={logs.filter(l => l.goal_id === goal.id)} index={i} />
-            </SwipeableCard>
-          ))}
+          {goals.filter(g => !g.paused).length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <span className="text-4xl mb-3">🎯</span>
+              <p className="text-muted-foreground text-sm mb-4">No goals yet — add your first one</p>
+              <button onClick={() => setAddOpen(true)} className="px-5 py-2.5 rounded-lg gradient-primary text-primary-foreground font-medium text-sm tap-target flex items-center gap-1.5">
+                <Plus size={16} /> Create Goal
+              </button>
+            </div>
+          ) : (
+            goals.filter(g => !g.paused).map((goal, i) => (
+              <SwipeableCard
+                key={goal.id}
+                onSwipeRight={() => setLogGoalId(goal.id)}
+                onSwipeLeft={() => setPauseGoalId(goal.id)}
+                rightLabel="Log"
+                leftLabel="Pause"
+              >
+                <GoalCard goal={goal} logs={logs.filter(l => l.goal_id === goal.id)} index={i} />
+              </SwipeableCard>
+            ))
+          )}
         </div>
 
         {todayTodos.length > 0 && (
