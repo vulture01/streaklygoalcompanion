@@ -20,7 +20,7 @@ export default function GoalDetailPage() {
   const { logs, addLog, refetch: refetchLogs } = useLogs(id);
   const { badges } = useBadges();
   const { recalcStreak } = useStreakCalculator();
-  const { callGroq, loading: aiLoading } = useGroqAI();
+  const { callGroq, loading: aiLoading, rateLimited, rateLimitMessage } = useGroqAI();
   const [logOpen, setLogOpen] = useState(false);
   const [note, setNote] = useState('');
   const [mood, setMood] = useState('💪');
@@ -159,11 +159,13 @@ export default function GoalDetailPage() {
               <RefreshCw size={14} className={aiLoading ? 'animate-spin' : ''} />
             </button>
           </div>
-          {suggestions ? (
+          {rateLimited ? (
+            <p className="text-sm text-warning">{rateLimitMessage}</p>
+          ) : suggestions ? (
             <p className="text-sm text-muted-foreground whitespace-pre-line">{suggestions}</p>
           ) : (
             <p className="text-sm text-muted-foreground italic">
-              {aiLoading ? 'Generating suggestions...' : 'Configure Groq API key for AI suggestions'}
+              {aiLoading ? 'Generating suggestions...' : 'AI suggestions will appear here'}
             </p>
           )}
         </div>

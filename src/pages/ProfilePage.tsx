@@ -85,7 +85,7 @@ export default function ProfilePage() {
         <div className="space-y-1">
           <button onClick={() => setGroqOpen(true)} className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-border tap-target">
             <Key size={18} className="text-muted-foreground" />
-            <span className="text-sm text-foreground flex-1 text-left">Change Groq API Key</span>
+            <span className="text-sm text-foreground flex-1 text-left">Groq API Key (optional, for unlimited AI)</span>
             <ChevronRight size={16} className="text-muted-foreground" />
           </button>
           <button onClick={handleExportJSON} className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-border tap-target">

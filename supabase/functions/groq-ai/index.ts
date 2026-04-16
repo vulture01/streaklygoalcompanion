@@ -142,18 +142,7 @@ serve(async (req) => {
     // Increment usage count for shared key users after successful call
     if (!userHasOwnKey) {
       const today = new Date().toISOString().split("T")[0];
-      await supabaseAdmin.from("ai_usage").upsert(
-        {
-          user_id: user.id,
-          date: today,
-          call_count: 1,
-        },
-        { onConflict: "user_id,date" }
-      );
-      // Increment via raw update for atomicity
-      await supabaseAdmin.rpc("increment_ai_usage" as any, { _user_id: user.id, _date: today }).catch(() => {
-        // Fallback: just upserted with count 1, acceptable for first call
-      });
+      await supabaseAdmin.rpc("increment_ai_usage", { _user_id: user.id, _date: today });
     }
 
     return new Response(JSON.stringify({ result }), {
