@@ -15,20 +15,26 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
   const [emoji, setEmoji] = useState('🎯');
   const [type, setType] = useState<'boolean' | 'numeric'>('boolean');
   const [target, setTarget] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim()) return;
-    await addGoal({
-      name: name.trim(),
-      emoji,
-      type,
-      target: type === 'numeric' ? Number(target) || 1 : undefined,
-    });
-    setName('');
-    setEmoji('🎯');
-    setType('boolean');
-    setTarget('');
-    onClose();
+    if (!name.trim() || saving) return;
+    setSaving(true);
+    try {
+      await addGoal({
+        name: name.trim(),
+        emoji,
+        type,
+        target: type === 'numeric' ? Number(target) || 1 : undefined,
+      });
+      setName('');
+      setEmoji('🎯');
+      setType('boolean');
+      setTarget('');
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -68,8 +74,9 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
               className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary" />
           </div>
         )}
-        <button onClick={handleSave} className="w-full py-3.5 rounded-lg gradient-primary text-primary-foreground font-semibold tap-target">
-          Create Goal
+        <button onClick={handleSave} disabled={saving} className="w-full py-3.5 rounded-lg gradient-primary text-primary-foreground font-semibold tap-target disabled:opacity-50">
+          {saving ? 'Creating...' : 'Create Goal'}
+        </button>
         </button>
       </div>
     </BottomSheet>

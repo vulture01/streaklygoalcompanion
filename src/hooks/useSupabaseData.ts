@@ -89,21 +89,7 @@ export function useGoals() {
     else await fetchGoals();
   };
 
-  const seedDefaultGoals = async () => {
-    if (!user) return;
-    const defaults = [
-      { name: 'Fitness', emoji: '💪', type: 'boolean' },
-      { name: 'Learning', emoji: '📚', type: 'boolean' },
-      { name: 'No Sugar', emoji: '🚫', type: 'boolean' },
-    ];
-    const { error } = await supabase
-      .from('goals')
-      .insert(defaults.map(g => ({ ...g, user_id: user.id })));
-    if (error) console.error('Failed to seed goals', error);
-    else await fetchGoals();
-  };
-
-  return { goals, loading, addGoal, updateGoal, seedDefaultGoals, refetch: fetchGoals };
+  return { goals, loading, addGoal, updateGoal, refetch: fetchGoals };
 }
 
 export function useLogs(goalId?: string) {
