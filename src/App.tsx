@@ -25,7 +25,7 @@ function AppRoutes() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading, hasGroqKey } = useProfile();
-  const { goals, loading: goalsLoading, seedDefaultGoals } = useGoals();
+  const { goals, loading: goalsLoading } = useGoals();
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
   const [groqSetupDone, setGroqSetupDone] = useState<boolean | null>(null);
 
@@ -38,13 +38,6 @@ function AppRoutes() {
       setOnboarded(false);
     }
   }, [profile, profileLoading, user]);
-
-  // Seed default goals on first login (when no goals exist yet and onboarding done)
-  useEffect(() => {
-    if (!goalsLoading && goals.length === 0 && onboarded && user) {
-      seedDefaultGoals();
-    }
-  }, [goalsLoading, goals.length, onboarded, user]);
 
   if (authLoading || (user && profileLoading)) {
     return (
