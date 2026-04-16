@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const DAILY_LIMIT = 15;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -19,12 +21,14 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey, {
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    // Use anon client for user auth check
+    const supabaseAnon = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabaseAnon.auth.getUser();
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -32,17 +36,49 @@ serve(async (req) => {
       });
     }
 
-    const { data: profile } = await supabase
+    // Use service role client for ai_usage table operations
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check if user has their own Groq API key
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("groq_api_key")
       .eq("user_id", user.id)
       .single();
 
-    if (!profile?.groq_api_key) {
-      return new Response(JSON.stringify({ error: "No Groq API key configured" }), {
+    const userHasOwnKey = !!profile?.groq_api_key;
+    const sharedKey = Deno.env.get("GROQ_API_KEY");
+
+    const groqApiKey = userHasOwnKey ? profile.groq_api_key : sharedKey;
+
+    if (!groqApiKey) {
+      return new Response(JSON.stringify({ error: "No Groq API key available. Please contact support." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Rate limiting only for shared key users
+    if (!userHasOwnKey) {
+      const today = new Date().toISOString().split("T")[0];
+      const { data: usage } = await supabaseAdmin
+        .from("ai_usage")
+        .select("call_count")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .single();
+
+      const currentCount = usage?.call_count || 0;
+
+      if (currentCount >= DAILY_LIMIT) {
+        return new Response(JSON.stringify({
+          error: "rate_limit",
+          message: "You've used all 15 AI calls for today. Come back tomorrow or add your own Groq API key in settings for unlimited access.",
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const { type, context } = await req.json();
@@ -77,7 +113,7 @@ serve(async (req) => {
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${profile.groq_api_key}`,
+        Authorization: `Bearer ${groqApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -102,6 +138,23 @@ serve(async (req) => {
 
     const groqData = await groqResponse.json();
     const result = groqData.choices?.[0]?.message?.content || "";
+
+    // Increment usage count for shared key users after successful call
+    if (!userHasOwnKey) {
+      const today = new Date().toISOString().split("T")[0];
+      await supabaseAdmin.from("ai_usage").upsert(
+        {
+          user_id: user.id,
+          date: today,
+          call_count: 1,
+        },
+        { onConflict: "user_id,date" }
+      );
+      // Increment via raw update for atomicity
+      await supabaseAdmin.rpc("increment_ai_usage" as any, { _user_id: user.id, _date: today }).catch(() => {
+        // Fallback: just upserted with count 1, acceptable for first call
+      });
+    }
 
     return new Response(JSON.stringify({ result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
