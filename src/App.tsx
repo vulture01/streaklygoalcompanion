@@ -53,10 +53,6 @@ function AppRoutes() {
     return <OnboardingPage onComplete={() => setOnboarded(true)} />;
   }
 
-  if (onboarded && groqSetupDone === false) {
-    return <GroqSetupPage onComplete={() => setGroqSetupDone(true)} />;
-  }
-
   return (
     <>
       <AnimatePresence mode="wait">
