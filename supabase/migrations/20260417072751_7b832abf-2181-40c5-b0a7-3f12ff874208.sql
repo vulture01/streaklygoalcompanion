@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.increment_ai_usage(UUID, DATE) FROM PUBLIC, anon, authenticated;
