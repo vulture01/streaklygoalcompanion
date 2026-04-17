@@ -65,6 +65,9 @@ function AppRoutes() {
           <Route path="/focus" element={<FocusPage />} />
           <Route path="/todos" element={<TodosPage />} />
           <Route path="/habits" element={<HabitsPage />} />
+          <Route path="/workout" element={<WorkoutPage />} />
+          <Route path="/workout/new-routine" element={<NewRoutinePage />} />
+          <Route path="/workout/session/:id" element={<WorkoutSessionPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/goal/:id" element={<GoalDetailPage />} />
