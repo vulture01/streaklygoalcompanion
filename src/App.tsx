@@ -18,6 +18,9 @@ import OnboardingPage from "./pages/OnboardingPage";
 import GroqSetupPage from "./pages/GroqSetupPage";
 import WeeklyReviewPage from "./pages/WeeklyReviewPage";
 import HabitsPage from "./pages/HabitsPage";
+import WorkoutPage from "./pages/WorkoutPage";
+import NewRoutinePage from "./pages/NewRoutinePage";
+import WorkoutSessionPage from "./pages/WorkoutSessionPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +65,9 @@ function AppRoutes() {
           <Route path="/focus" element={<FocusPage />} />
           <Route path="/todos" element={<TodosPage />} />
           <Route path="/habits" element={<HabitsPage />} />
+          <Route path="/workout" element={<WorkoutPage />} />
+          <Route path="/workout/new-routine" element={<NewRoutinePage />} />
+          <Route path="/workout/session/:id" element={<WorkoutSessionPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/goal/:id" element={<GoalDetailPage />} />
