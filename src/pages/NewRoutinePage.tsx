@@ -27,7 +27,7 @@ const exerciseSchema = z.object({
   weight: z.number().min(0).max(2000),
 });
 
-type Exercise = z.infer<typeof exerciseSchema>;
+type Exercise = { name: string; sets: number; reps: number; weight: number };
 
 export default function NewRoutinePage() {
   const navigate = useNavigate();
@@ -64,7 +64,12 @@ export default function NewRoutinePage() {
         toast.error(`Invalid values for "${r.name || 'exercise'}"`);
         return;
       }
-      items.push(parsed.data as Exercise);
+      items.push({
+        name: parsed.data.name as string,
+        sets: parsed.data.sets as number,
+        reps: parsed.data.reps as number,
+        weight: parsed.data.weight as number,
+      });
     }
     setSaving(true);
     try {
