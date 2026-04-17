@@ -1,11 +1,21 @@
 import { PageTransition } from '@/components/PageTransition';
 import { useProfile, useGoals, useLogs, useBadges } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Download, LogOut, ChevronRight, Key } from 'lucide-react';
+import { User, Download, LogOut, ChevronRight, Key, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { BottomSheet } from '@/components/BottomSheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth();
@@ -15,6 +25,9 @@ export default function ProfilePage() {
   const { badges } = useBadges();
   const [groqOpen, setGroqOpen] = useState(false);
   const [newKey, setNewKey] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const totalLogs = logs.filter(l => l.completed).length;
   const bestStreak = Math.max(...goals.map(g => g.best_streak), 0);
@@ -37,6 +50,24 @@ export default function ProfilePage() {
     setNewKey('');
     setGroqOpen(false);
     toast.success('API key updated!');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-account');
+      if (error || (data as any)?.error) {
+        throw error || new Error((data as any).error);
+      }
+      toast.success('Account deleted');
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete account. Please try again.');
+      setDeleting(false);
+    }
   };
 
   return (
@@ -98,8 +129,45 @@ export default function ProfilePage() {
             <span className="text-sm text-foreground flex-1 text-left">Sign Out</span>
             <ChevronRight size={16} className="text-muted-foreground" />
           </button>
+          <button
+            onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
+            className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-destructive/40 tap-target mt-4"
+          >
+            <Trash2 size={18} className="text-destructive" />
+            <span className="text-sm text-destructive flex-1 text-left">Delete Account</span>
+            <ChevronRight size={16} className="text-destructive" />
+          </button>
         </div>
       </div>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes your profile and all associated data — goals, habits, workouts, logs, todos, and badges. This action cannot be undone.
+              <br /><br />
+              Type <span className="font-mono font-semibold text-destructive">DELETE</span> to confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="DELETE"
+            className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-destructive font-mono"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={confirmText !== 'DELETE' || deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Delete Forever'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <BottomSheet open={groqOpen} onClose={() => setGroqOpen(false)} title="Update Groq API Key">
         <div className="space-y-4">
