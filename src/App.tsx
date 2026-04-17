@@ -18,6 +18,9 @@ import OnboardingPage from "./pages/OnboardingPage";
 import GroqSetupPage from "./pages/GroqSetupPage";
 import WeeklyReviewPage from "./pages/WeeklyReviewPage";
 import HabitsPage from "./pages/HabitsPage";
+import WorkoutPage from "./pages/WorkoutPage";
+import NewRoutinePage from "./pages/NewRoutinePage";
+import WorkoutSessionPage from "./pages/WorkoutSessionPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
