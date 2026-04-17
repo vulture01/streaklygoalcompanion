@@ -1,0 +1,98 @@
+import { useState } from 'react';
+import { Plus, Flame, Check, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { PageTransition } from '@/components/PageTransition';
+import { useHabits } from '@/hooks/useHabits';
+import { HabitGrid } from '@/components/HabitGrid';
+import { AddHabitSheet } from '@/components/AddHabitSheet';
+import { Button } from '@/components/ui/button';
+
+export default function HabitsPage() {
+  const { habits, loading, toggleToday, deleteHabit, getCompletionsFor, isCompletedToday } = useHabits();
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  return (
+    <PageTransition>
+      <div className="min-h-screen pb-24" style={{ paddingTop: 'var(--safe-top)' }}>
+        <header className="px-5 pt-6 pb-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Habits</h1>
+            <p className="text-sm text-muted-foreground mt-1">Build daily momentum</p>
+          </div>
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="w-11 h-11 rounded-full gradient-primary flex items-center justify-center tap-target"
+            aria-label="Add habit"
+          >
+            <Plus size={22} className="text-primary-foreground" />
+          </button>
+        </header>
+
+        <div className="px-5 space-y-3">
+          {loading ? (
+            <div className="text-center text-muted-foreground py-12 text-sm">Loading…</div>
+          ) : habits.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-5xl mb-3">🌱</div>
+              <p className="text-muted-foreground mb-4">No habits yet — add your first one</p>
+              <Button onClick={() => setSheetOpen(true)} className="gradient-primary">
+                <Plus size={18} className="mr-1" />
+                Add Habit
+              </Button>
+            </div>
+          ) : (
+            habits.map((habit) => {
+              const completed = isCompletedToday(habit.id);
+              const dates = getCompletionsFor(habit.id).map((c) => c.date);
+              return (
+                <motion.div
+                  key={habit.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-card border border-border rounded-2xl p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-3xl">{habit.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">{habit.name}</div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                        <span className="capitalize">{habit.frequency}</span>
+                        <span className="flex items-center gap-1">
+                          <Flame size={12} className="text-primary" />
+                          {habit.streak} day{habit.streak === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleToday(habit.id)}
+                      className={`w-11 h-11 rounded-full flex items-center justify-center tap-target transition-colors ${
+                        completed ? 'gradient-primary' : 'bg-muted'
+                      }`}
+                      aria-label={completed ? 'Mark incomplete' : 'Mark complete'}
+                    >
+                      <Check size={20} className={completed ? 'text-primary-foreground' : 'text-muted-foreground'} />
+                    </button>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <HabitGrid completionDates={dates} days={7} />
+                    <button
+                      onClick={() => deleteHabit(habit.id)}
+                      className="text-muted-foreground hover:text-destructive p-2 tap-target"
+                      aria-label="Delete habit"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
+
+        <AddHabitSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+      </div>
+    </PageTransition>
+  );
+}
