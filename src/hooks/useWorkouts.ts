@@ -34,6 +34,12 @@ export function useRoutines() {
     items: Array<{ name: string; sets: number; reps: number; weight: number }>
   ): Promise<string | null> => {
     if (!user) return null;
+    const safeItems = items.map((it) => ({
+      name: it.name,
+      sets: it.sets,
+      reps: it.reps,
+      weight: it.weight,
+    }));
     const { data, error } = await supabase
       .from('routines')
       .insert({ user_id: user.id, name, description })
