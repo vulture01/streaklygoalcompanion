@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useGoals } from '@/hooks/useSupabaseData';
 import { useHabits } from '@/hooks/useHabits';
-import { useWorkouts } from '@/hooks/useWorkouts';
+import { useWorkoutSessions } from '@/hooks/useWorkouts';
 import { usePhysique } from '@/hooks/usePhysique';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -19,7 +19,7 @@ export default function CoachPage() {
   const { user } = useAuth();
   const { goals } = useGoals();
   const { habits, completions } = useHabits();
-  const { sessions } = useWorkouts();
+  const { sessions } = useWorkoutSessions();
   const { logs: physique } = usePhysique();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -44,7 +44,10 @@ export default function CoachPage() {
       })
       .join('; ') || 'none';
 
-    const recentSessions = (sessions || [])
+    const sortedSessions = [...(sessions || [])].sort(
+      (a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime()
+    );
+    const recentSessions = sortedSessions
       .slice(0, 3)
       .map((s) => {
         const d = new Date(s.started_at).toLocaleDateString();
@@ -54,8 +57,8 @@ export default function CoachPage() {
 
     let physiqueTrend = 'no entries';
     if (physique && physique.length >= 1) {
-      const latest = physique[0];
-      const first = physique[physique.length - 1];
+      const latest = physique[physique.length - 1];
+      const first = physique[0];
       const wDelta = latest.weight && first.weight ? (Number(latest.weight) - Number(first.weight)).toFixed(1) : null;
       const bfDelta = latest.body_fat && first.body_fat ? (Number(latest.body_fat) - Number(first.body_fat)).toFixed(1) : null;
       physiqueTrend = `latest weight: ${latest.weight ?? '?'}kg, BF: ${latest.body_fat ?? '?'}%`;
