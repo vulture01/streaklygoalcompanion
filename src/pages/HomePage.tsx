@@ -186,6 +186,20 @@ export default function HomePage() {
       </BottomSheet>
 
       <AddGoalSheet open={addOpen} onClose={() => setAddOpen(false)} />
+      <EditGoalSheet goal={editingGoal} onClose={() => setEditingGoal(null)} />
+      <ConfirmDeleteDialog
+        open={!!deletingGoal}
+        onOpenChange={(o) => !o && setDeletingGoal(null)}
+        title="Delete this goal?"
+        description="This will remove all its history too."
+        onConfirm={async () => {
+          if (deletingGoal) {
+            await deleteGoal(deletingGoal.id);
+            await refetchLogs();
+            setDeletingGoal(null);
+          }
+        }}
+      />
       <ConfettiCelebration milestone={celebration} onDone={() => setCelebration(null)} />
     </PageTransition>
   );
