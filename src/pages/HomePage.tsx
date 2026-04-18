@@ -7,14 +7,19 @@ import { ConfettiCelebration } from '@/components/ConfettiCelebration';
 import { Plus, Bell } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { AddGoalSheet } from '@/components/AddGoalSheet';
+import { EditGoalSheet } from '@/components/EditGoalSheet';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { BottomSheet } from '@/components/BottomSheet';
+import type { Tables } from '@/integrations/supabase/types';
+
+type Goal = Tables<'goals'>;
 
 const MOODS = ['💪', '😐', '😓'];
 const ENERGIES = ['High', 'Medium', 'Low'] as const;
 const PAUSE_REASONS = ['Sick', 'Travel', 'Rest'];
 
 export default function HomePage() {
-  const { goals, updateGoal, refetch: refetchGoals } = useGoals();
+  const { goals, updateGoal, deleteGoal, refetch: refetchGoals } = useGoals();
   const { logs, addLog, refetch: refetchLogs } = useLogs();
   const { todos } = useTodos();
   const { profile } = useProfile();
@@ -23,6 +28,8 @@ export default function HomePage() {
   const [addOpen, setAddOpen] = useState(false);
   const [logGoalId, setLogGoalId] = useState<string | null>(null);
   const [pauseGoalId, setPauseGoalId] = useState<string | null>(null);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
   const [note, setNote] = useState('');
   const [mood, setMood] = useState('💪');
   const [energy, setEnergy] = useState<'High' | 'Medium' | 'Low'>('Medium');
@@ -98,7 +105,13 @@ export default function HomePage() {
                 rightLabel="Log"
                 leftLabel="Pause"
               >
-                <GoalCard goal={goal} logs={logs.filter(l => l.goal_id === goal.id)} index={i} />
+                <GoalCard
+                  goal={goal}
+                  logs={logs.filter(l => l.goal_id === goal.id)}
+                  index={i}
+                  onEdit={(g) => setEditingGoal(g)}
+                  onDelete={(g) => setDeletingGoal(g)}
+                />
               </SwipeableCard>
             ))
           )}
@@ -173,6 +186,20 @@ export default function HomePage() {
       </BottomSheet>
 
       <AddGoalSheet open={addOpen} onClose={() => setAddOpen(false)} />
+      <EditGoalSheet goal={editingGoal} onClose={() => setEditingGoal(null)} />
+      <ConfirmDeleteDialog
+        open={!!deletingGoal}
+        onOpenChange={(o) => !o && setDeletingGoal(null)}
+        title="Delete this goal?"
+        description="This will remove all its history too."
+        onConfirm={async () => {
+          if (deletingGoal) {
+            await deleteGoal(deletingGoal.id);
+            await refetchLogs();
+            setDeletingGoal(null);
+          }
+        }}
+      />
       <ConfettiCelebration milestone={celebration} onDone={() => setCelebration(null)} />
     </PageTransition>
   );

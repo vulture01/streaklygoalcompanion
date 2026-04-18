@@ -4,15 +4,22 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { HeatmapStrip } from '@/components/HeatmapStrip';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
-import { Share2, Download } from 'lucide-react';
-import { useRef, useCallback } from 'react';
+import { Download, Pencil, Trash2 } from 'lucide-react';
+import { useRef, useCallback, useState } from 'react';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
+import { EditGoalSheet } from '@/components/EditGoalSheet';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import type { Tables } from '@/integrations/supabase/types';
+
+type Goal = Tables<'goals'>;
 
 export default function AnalyticsPage() {
-  const { goals } = useGoals();
-  const { logs } = useLogs();
+  const { goals, deleteGoal } = useGoals();
+  const { logs, refetch: refetchLogs } = useLogs();
   const shareRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState<Goal | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Goal | null>(null);
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const dayStats = dayNames.map((name, dayIndex) => {
@@ -52,7 +59,7 @@ export default function AnalyticsPage() {
 
         {/* Share Card */}
         <div ref={shareRef} className="bg-card rounded-lg p-5 border border-border mb-5">
-          <div className="flex items-center justify-around">
+          <div className="flex items-center justify-around flex-wrap gap-3">
             {goals.map((goal) => {
               const goalLogs = logs.filter(l => l.goal_id === goal.id);
               const completed = goalLogs.filter(l => l.completed).length;
@@ -95,12 +102,41 @@ export default function AnalyticsPage() {
                 <span className="text-lg">{goal.emoji}</span>
                 <h3 className="text-sm font-medium text-foreground">{goal.name}</h3>
                 <span className="ml-auto text-xs text-muted-foreground">{goal.streak} day streak</span>
+                <button
+                  onClick={() => setEditing(goal)}
+                  className="text-muted-foreground hover:text-primary p-1.5 tap-target"
+                  aria-label="Edit goal"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  onClick={() => setPendingDelete(goal)}
+                  className="text-muted-foreground hover:text-destructive p-1.5 tap-target"
+                  aria-label="Delete goal"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
               <HeatmapStrip logs={goalLogs} />
             </motion.div>
           );
         })}
       </div>
+
+      <EditGoalSheet goal={editing} onClose={() => setEditing(null)} />
+      <ConfirmDeleteDialog
+        open={!!pendingDelete}
+        onOpenChange={(o) => !o && setPendingDelete(null)}
+        title="Delete this goal?"
+        description="This will remove all its history too."
+        onConfirm={async () => {
+          if (pendingDelete) {
+            await deleteGoal(pendingDelete.id);
+            await refetchLogs();
+            setPendingDelete(null);
+          }
+        }}
+      />
     </PageTransition>
   );
 }
