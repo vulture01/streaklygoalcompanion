@@ -1,7 +1,8 @@
 import { PageTransition } from '@/components/PageTransition';
 import { useProfile, useGoals, useLogs, useBadges } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Download, LogOut, ChevronRight, Key, Trash2 } from 'lucide-react';
+import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -18,6 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { profile, updateProfile } = useProfile();
   const { goals } = useGoals();
@@ -114,6 +116,11 @@ export default function ProfilePage() {
         )}
 
         <div className="space-y-1">
+          <button onClick={() => navigate('/profile/physique')} className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-border tap-target">
+            <Activity size={18} className="text-muted-foreground" />
+            <span className="text-sm text-foreground flex-1 text-left">Physique</span>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </button>
           <button onClick={() => setGroqOpen(true)} className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-border tap-target">
             <Key size={18} className="text-muted-foreground" />
             <span className="text-sm text-foreground flex-1 text-left">Groq API Key (optional, for unlimited AI)</span>
