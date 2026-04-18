@@ -42,7 +42,19 @@ export function useHabits() {
       supabase.from('habits').select('*').eq('user_id', user.id).order('created_at'),
       supabase.from('habit_completions').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(1000),
     ]);
-    setHabits(h || []);
+
+    // Defensive UI dedupe: keep earliest per (user_id, lower(name))
+    const seen = new Set<string>();
+    const uniqueHabits: Habit[] = [];
+    for (const habit of (h || [])) {
+      const key = habit.name.trim().toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueHabits.push(habit);
+      }
+    }
+
+    setHabits(uniqueHabits);
     setCompletions(c || []);
     setLoading(false);
   }, [user]);
@@ -52,15 +64,43 @@ export function useHabits() {
   const addHabit = async (habit: Omit<TablesInsert<'habits'>, 'user_id'>) => {
     if (!user) return;
     const { error } = await supabase.from('habits').insert({ ...habit, user_id: user.id });
-    if (error) toast.error('Failed to add habit');
-    else await fetchAll();
+    if (error) {
+      if ((error as any).code === '23505') {
+        toast.error('You already have a habit with that name');
+      } else {
+        toast.error('Failed to add habit');
+      }
+    } else {
+      await fetchAll();
+    }
+  };
+
+  const updateHabit = async (id: string, updates: Partial<Habit>) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('habits')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', user.id);
+    if (error) {
+      if ((error as any).code === '23505') {
+        toast.error('You already have a habit with that name');
+      } else {
+        toast.error('Failed to update habit');
+      }
+    } else {
+      await fetchAll();
+    }
   };
 
   const deleteHabit = async (id: string) => {
     if (!user) return;
     const { error } = await supabase.from('habits').delete().eq('id', id).eq('user_id', user.id);
     if (error) toast.error('Failed to delete habit');
-    else await fetchAll();
+    else {
+      toast.success('Habit deleted');
+      await fetchAll();
+    }
   };
 
   const toggleToday = async (habitId: string) => {
@@ -97,5 +137,5 @@ export function useHabits() {
     return completions.some(c => c.habit_id === habitId && c.date === today);
   };
 
-  return { habits, completions, loading, addHabit, deleteHabit, toggleToday, getCompletionsFor, isCompletedToday, refetch: fetchAll };
+  return { habits, completions, loading, addHabit, updateHabit, deleteHabit, toggleToday, getCompletionsFor, isCompletedToday, refetch: fetchAll };
 }

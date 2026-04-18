@@ -89,7 +89,21 @@ export function useGoals() {
     else await fetchGoals();
   };
 
-  return { goals, loading, addGoal, updateGoal, refetch: fetchGoals };
+  const deleteGoal = async (id: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('goals')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
+    if (error) toast.error('Failed to delete goal');
+    else {
+      toast.success('Goal deleted');
+      await fetchGoals();
+    }
+  };
+
+  return { goals, loading, addGoal, updateGoal, deleteGoal, refetch: fetchGoals };
 }
 
 export function useLogs(goalId?: string) {
