@@ -22,6 +22,7 @@ import WorkoutPage from "./pages/WorkoutPage";
 import NewRoutinePage from "./pages/NewRoutinePage";
 import WorkoutSessionPage from "./pages/WorkoutSessionPage";
 import PhysiquePage from "./pages/PhysiquePage";
+import CoachPage from "./pages/CoachPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ function AppRoutes() {
           <Route path="/workout/new-routine" element={<NewRoutinePage />} />
           <Route path="/workout/session/:id" element={<WorkoutSessionPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/coach" element={<CoachPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/physique" element={<PhysiquePage />} />
           <Route path="/goal/:id" element={<GoalDetailPage />} />

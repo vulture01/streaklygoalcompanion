@@ -81,28 +81,75 @@ serve(async (req) => {
       }
     }
 
-    const { type, context } = await req.json();
+    const { type, context, history, message, mode } = await req.json();
 
     let systemPrompt = "";
-    let userPrompt = "";
+    let messages: Array<{ role: string; content: string }> = [];
+    let maxTokens = 300;
 
     switch (type) {
       case "suggestions":
         systemPrompt = "You are a personal habit coach. Based on the user's recent logs, provide exactly 2 short, actionable suggestions to improve their habit. Be specific and encouraging. Return only the 2 suggestions as bullet points.";
-        userPrompt = `Here are my last 14 days of logs:\n${context}\n\nGive me 2 personalized suggestions.`;
+        messages = [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Here are my last 14 days of logs:\n${context}\n\nGive me 2 personalized suggestions.` },
+        ];
         break;
       case "weekly-review":
         systemPrompt = "You are a motivational coach. Write a short motivational paragraph (3-4 sentences) reviewing the user's week, then add 1 key insight. Be warm and encouraging.";
-        userPrompt = `Here is my 7-day summary:\n${context}\n\nWrite my weekly review.`;
+        messages = [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Here is my 7-day summary:\n${context}\n\nWrite my weekly review.` },
+        ];
         break;
       case "prediction":
         systemPrompt = "You are a data analyst. Based on the streak data, write one natural language sentence predicting when they'll hit a 30-day streak. Be encouraging. Return only one sentence.";
-        userPrompt = context;
+        messages = [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: context },
+        ];
         break;
       case "correlation":
         systemPrompt = "You are a data analyst. Find one interesting correlation between the user's goals. Return one sentence observation.";
-        userPrompt = `Goal data:\n${context}\n\nFind a correlation.`;
+        messages = [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Goal data:\n${context}\n\nFind a correlation.` },
+        ];
         break;
+      case "coach": {
+        // Modes: 'briefing' (daily greeting), 'plan' (full day plan), 'chat' (free Q&A)
+        const baseSystem = `You are an elite personal coach for training, nutrition, habits, and mindset. You speak warmly, like iMessage — concise, friendly, no fluff. Use short paragraphs and the occasional emoji. NEVER use markdown headers (#) or long bullet dumps; keep it conversational.
+
+You have full context about the user below. Refer to it naturally — don't restate it as a list unless asked.
+
+USER CONTEXT:
+${context || "No additional context."}`;
+
+        let modeInstruction = "";
+        if (mode === "briefing") {
+          modeInstruction = "Give a short personalized daily briefing (3-5 sentences). Mention 1-2 specific things from their data (a streak, a recent workout, today's habits) and end with one focused suggestion for today.";
+          maxTokens = 350;
+        } else if (mode === "plan") {
+          modeInstruction = "Generate a full day plan tailored to this user's goals, habits, recent training, and physique trend. Format as a simple time-blocked list (Morning / Midday / Afternoon / Evening) with 1-2 lines per block. Be realistic and specific.";
+          maxTokens = 600;
+        } else {
+          modeInstruction = "Answer the user's question directly and helpfully. Reference their data when relevant.";
+          maxTokens = 500;
+        }
+
+        messages = [{ role: "system", content: `${baseSystem}\n\nINSTRUCTION: ${modeInstruction}` }];
+
+        // Include up to last 10 messages of history
+        if (Array.isArray(history)) {
+          const recent = history.slice(-10).filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string");
+          messages.push(...recent);
+        }
+
+        if (typeof message === "string" && message.trim()) {
+          messages.push({ role: "user", content: message });
+        }
+        break;
+      }
       default:
         return new Response(JSON.stringify({ error: "Invalid type" }), {
           status: 400,
@@ -118,11 +165,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        max_tokens: 300,
+        messages,
+        max_tokens: maxTokens,
         temperature: 0.7,
       }),
     });
