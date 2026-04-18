@@ -1,15 +1,22 @@
 import { useState } from 'react';
-import { Plus, Flame, Check, Trash2 } from 'lucide-react';
+import { Plus, Flame, Check, Trash2, Pencil } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
 import { useHabits } from '@/hooks/useHabits';
 import { HabitGrid } from '@/components/HabitGrid';
 import { AddHabitSheet } from '@/components/AddHabitSheet';
+import { EditHabitSheet } from '@/components/EditHabitSheet';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { Button } from '@/components/ui/button';
+import type { Tables } from '@/integrations/supabase/types';
+
+type Habit = Tables<'habits'>;
 
 export default function HabitsPage() {
   const { habits, loading, toggleToday, deleteHabit, getCompletionsFor, isCompletedToday } = useHabits();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [editing, setEditing] = useState<Habit | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Habit | null>(null);
 
   return (
     <PageTransition>
@@ -77,13 +84,22 @@ export default function HabitsPage() {
 
                   <div className="mt-3 flex items-center justify-between">
                     <HabitGrid completionDates={dates} days={7} />
-                    <button
-                      onClick={() => deleteHabit(habit.id)}
-                      className="text-muted-foreground hover:text-destructive p-2 tap-target"
-                      aria-label="Delete habit"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditing(habit)}
+                        className="text-muted-foreground hover:text-primary p-2 tap-target"
+                        aria-label="Edit habit"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={() => setPendingDelete(habit)}
+                        className="text-muted-foreground hover:text-destructive p-2 tap-target"
+                        aria-label="Delete habit"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -92,6 +108,19 @@ export default function HabitsPage() {
         </div>
 
         <AddHabitSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+        <EditHabitSheet habit={editing} onClose={() => setEditing(null)} />
+        <ConfirmDeleteDialog
+          open={!!pendingDelete}
+          onOpenChange={(o) => !o && setPendingDelete(null)}
+          title="Delete this habit?"
+          description="This will remove all its history too."
+          onConfirm={async () => {
+            if (pendingDelete) {
+              await deleteHabit(pendingDelete.id);
+              setPendingDelete(null);
+            }
+          }}
+        />
       </div>
     </PageTransition>
   );

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ProgressRing } from './ProgressRing';
 import { HeatmapStrip } from './HeatmapStrip';
-import { Flame, Pause } from 'lucide-react';
+import { Flame, Pause, Pencil, Trash2 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,9 +12,11 @@ interface GoalCardProps {
   goal: Goal;
   logs: Log[];
   index: number;
+  onEdit?: (goal: Goal) => void;
+  onDelete?: (goal: Goal) => void;
 }
 
-export function GoalCard({ goal, logs, index }: GoalCardProps) {
+export function GoalCard({ goal, logs, index, onEdit, onDelete }: GoalCardProps) {
   const navigate = useNavigate();
 
   const last7 = logs.filter((l) => {
@@ -24,6 +26,10 @@ export function GoalCard({ goal, logs, index }: GoalCardProps) {
     return diff < 7 && l.completed;
   });
   const weekProgress = Math.round((last7.length / 7) * 100);
+
+  const stop = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <motion.div
@@ -55,6 +61,28 @@ export function GoalCard({ goal, logs, index }: GoalCardProps) {
           </div>
           <HeatmapStrip logs={logs} />
         </div>
+        {(onEdit || onDelete) && (
+          <div className="flex flex-col gap-1 -mr-1">
+            {onEdit && (
+              <button
+                onClick={(e) => { stop(e); onEdit(goal); }}
+                className="text-muted-foreground hover:text-primary p-1.5 tap-target"
+                aria-label="Edit goal"
+              >
+                <Pencil size={15} />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={(e) => { stop(e); onDelete(goal); }}
+                className="text-muted-foreground hover:text-destructive p-1.5 tap-target"
+                aria-label="Delete goal"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   );
