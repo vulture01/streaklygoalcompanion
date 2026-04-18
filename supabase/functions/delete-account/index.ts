@@ -48,10 +48,23 @@ serve(async (req) => {
       "logs",
       "badges",
       "todos",
+      "physique_logs",
       "goals",
       "ai_usage",
       "profiles",
     ];
+
+    // Remove user's physique photos from storage
+    try {
+      const { data: files } = await admin.storage.from("physique-photos").list(uid);
+      if (files && files.length > 0) {
+        await admin.storage
+          .from("physique-photos")
+          .remove(files.map((f) => `${uid}/${f.name}`));
+      }
+    } catch (storageErr) {
+      console.error("Failed to clean physique photos:", storageErr);
+    }
 
     for (const t of tables) {
       const { error } = await admin.from(t).delete().eq("user_id", uid);

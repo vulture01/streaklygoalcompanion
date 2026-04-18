@@ -236,6 +236,51 @@ export type Database = {
           },
         ]
       }
+      physique_logs: {
+        Row: {
+          arms: number | null
+          body_fat: number | null
+          chest: number | null
+          created_at: string
+          date: string
+          hips: number | null
+          id: string
+          photo_url: string | null
+          updated_at: string
+          user_id: string
+          waist: number | null
+          weight: number | null
+        }
+        Insert: {
+          arms?: number | null
+          body_fat?: number | null
+          chest?: number | null
+          created_at?: string
+          date?: string
+          hips?: number | null
+          id?: string
+          photo_url?: string | null
+          updated_at?: string
+          user_id: string
+          waist?: number | null
+          weight?: number | null
+        }
+        Update: {
+          arms?: number | null
+          body_fat?: number | null
+          chest?: number | null
+          created_at?: string
+          date?: string
+          hips?: number | null
+          id?: string
+          photo_url?: string | null
+          updated_at?: string
+          user_id?: string
+          waist?: number | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
