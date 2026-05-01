@@ -7,7 +7,9 @@ import { HabitGrid } from '@/components/HabitGrid';
 import { AddHabitSheet } from '@/components/AddHabitSheet';
 import { EditHabitSheet } from '@/components/EditHabitSheet';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
-import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/ListSkeleton';
+import { PullToRefresh } from '@/components/PullToRefresh';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Habit = Tables<'habits'>;
