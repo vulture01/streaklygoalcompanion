@@ -22,10 +22,10 @@ export function useProfile() {
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
-      .select('id, user_id, name, wake_up_time, created_at, updated_at')
+      .select('id, user_id, name, username, focus, wake_up_time, onboarding_completed, calorie_target, protein_target, carbs_target, fat_target, created_at, updated_at')
       .eq('user_id', user.id)
       .single();
-    setProfile(data);
+    setProfile(data as any);
     // Check if groq key exists without exposing its value to component state
     const { data: keyCheck } = await supabase
       .from('profiles')

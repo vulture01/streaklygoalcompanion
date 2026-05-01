@@ -1,0 +1,12 @@
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS username TEXT,
+  ADD COLUMN IF NOT EXISTS focus TEXT,
+  ADD COLUMN IF NOT EXISTS calorie_target INTEGER DEFAULT 2200,
+  ADD COLUMN IF NOT EXISTS protein_target INTEGER DEFAULT 150,
+  ADD COLUMN IF NOT EXISTS carbs_target INTEGER DEFAULT 220,
+  ADD COLUMN IF NOT EXISTS fat_target INTEGER DEFAULT 70;
+
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_username_unique
+  ON public.profiles (lower(username))
+  WHERE username IS NOT NULL;

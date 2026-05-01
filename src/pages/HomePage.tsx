@@ -5,11 +5,14 @@ import { useGoals, useLogs, useTodos, useProfile, useBadges, useStreakCalculator
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
 import { Plus, Bell } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { AddGoalSheet } from '@/components/AddGoalSheet';
 import { EditGoalSheet } from '@/components/EditGoalSheet';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { BottomSheet } from '@/components/BottomSheet';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/ListSkeleton';
+import { PullToRefresh } from '@/components/PullToRefresh';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Goal = Tables<'goals'>;
@@ -19,7 +22,7 @@ const ENERGIES = ['High', 'Medium', 'Low'] as const;
 const PAUSE_REASONS = ['Sick', 'Travel', 'Rest'];
 
 export default function HomePage() {
-  const { goals, updateGoal, deleteGoal, refetch: refetchGoals } = useGoals();
+  const { goals, loading: goalsLoading, updateGoal, deleteGoal, refetch: refetchGoals } = useGoals();
   const { logs, addLog, refetch: refetchLogs } = useLogs();
   const { todos } = useTodos();
   const { profile } = useProfile();
@@ -87,15 +90,18 @@ export default function HomePage() {
           </button>
         </div>
 
+        <PullToRefresh onRefresh={async () => { await refetchGoals(); await refetchLogs(); }}>
         <div className="space-y-3 mb-6">
-          {goals.filter(g => !g.paused).length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <span className="text-4xl mb-3">🎯</span>
-              <p className="text-muted-foreground text-sm mb-4">No goals yet — add your first one</p>
-              <button onClick={() => setAddOpen(true)} className="px-5 py-2.5 rounded-lg gradient-primary text-primary-foreground font-medium text-sm tap-target flex items-center gap-1.5">
-                <Plus size={16} /> Create Goal
-              </button>
-            </div>
+          {goalsLoading ? (
+            <ListSkeleton rows={3} />
+          ) : goals.filter(g => !g.paused).length === 0 ? (
+            <EmptyState
+              emoji="🎯"
+              title="No active goals"
+              description="Set your first goal and start your streak today."
+              ctaLabel="Create Goal"
+              onCta={() => setAddOpen(true)}
+            />
           ) : (
             goals.filter(g => !g.paused).map((goal, i) => (
               <SwipeableCard
@@ -116,6 +122,7 @@ export default function HomePage() {
             ))
           )}
         </div>
+        </PullToRefresh>
 
         {todayTodos.length > 0 && (
           <div>

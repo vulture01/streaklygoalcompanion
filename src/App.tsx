@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { BottomNav } from "@/components/BottomNav";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useProfile, useGoals } from "@/hooks/useSupabaseData";
+import { useProfile } from "@/hooks/useSupabaseData";
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
@@ -30,18 +30,18 @@ const queryClient = new QueryClient();
 function AppRoutes() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading, hasGroqKey } = useProfile();
-  const { goals, loading: goalsLoading } = useGoals();
+  const { profile, loading: profileLoading, refetch } = useProfile();
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
-  const [groqSetupDone, setGroqSetupDone] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!profileLoading && profile) {
-      setOnboarded(!!profile.name && profile.name !== '');
-      setGroqSetupDone(hasGroqKey);
-    }
-    if (!profileLoading && !profile && user) {
-      setOnboarded(false);
+    if (!profileLoading) {
+      if (profile) {
+        // Treat existing accounts (with a name set) as onboarded for backward compat.
+        const completed = (profile as any).onboarding_completed === true || (!!profile.name && profile.name !== '');
+        setOnboarded(completed);
+      } else if (user) {
+        setOnboarded(false);
+      }
     }
   }, [profile, profileLoading, user]);
 
@@ -56,7 +56,7 @@ function AppRoutes() {
   if (!user) return <AuthPage />;
 
   if (onboarded === false) {
-    return <OnboardingPage onComplete={() => setOnboarded(true)} />;
+    return <OnboardingPage onComplete={async () => { await refetch(); setOnboarded(true); }} />;
   }
 
   return (
