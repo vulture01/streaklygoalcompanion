@@ -5,11 +5,14 @@ import { motion } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
 import { Button } from '@/components/ui/button';
 import { useRoutines, useWorkoutSessions } from '@/hooks/useWorkouts';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/ListSkeleton';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 export default function WorkoutPage() {
   const navigate = useNavigate();
-  const { routines, getExercises, deleteRoutine, loading: routinesLoading } = useRoutines();
-  const { sessions, startSession, deleteSession, loading: sessionsLoading } = useWorkoutSessions();
+  const { routines, getExercises, deleteRoutine, loading: routinesLoading, refetch: refetchRoutines } = useRoutines();
+  const { sessions, startSession, deleteSession, loading: sessionsLoading, refetch: refetchSessions } = useWorkoutSessions();
   const [tab, setTab] = useState<'routines' | 'history'>('routines');
 
   const handleStart = async (name: string, routineId: string | null) => {
