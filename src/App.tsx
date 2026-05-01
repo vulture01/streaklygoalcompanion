@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { BottomNav } from "@/components/BottomNav";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useProfile, useGoals } from "@/hooks/useSupabaseData";
+import { useProfile } from "@/hooks/useSupabaseData";
 import { useState, useEffect } from "react";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./pages/HomePage";
