@@ -283,30 +283,51 @@ export type Database = {
       }
       profiles: {
         Row: {
+          calorie_target: number | null
+          carbs_target: number | null
           created_at: string
+          fat_target: number | null
+          focus: string | null
           groq_api_key: string | null
           id: string
           name: string
+          onboarding_completed: boolean
+          protein_target: number | null
           updated_at: string
           user_id: string
+          username: string | null
           wake_up_time: string | null
         }
         Insert: {
+          calorie_target?: number | null
+          carbs_target?: number | null
           created_at?: string
+          fat_target?: number | null
+          focus?: string | null
           groq_api_key?: string | null
           id?: string
           name?: string
+          onboarding_completed?: boolean
+          protein_target?: number | null
           updated_at?: string
           user_id: string
+          username?: string | null
           wake_up_time?: string | null
         }
         Update: {
+          calorie_target?: number | null
+          carbs_target?: number | null
           created_at?: string
+          fat_target?: number | null
+          focus?: string | null
           groq_api_key?: string | null
           id?: string
           name?: string
+          onboarding_completed?: boolean
+          protein_target?: number | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           wake_up_time?: string | null
         }
         Relationships: []
