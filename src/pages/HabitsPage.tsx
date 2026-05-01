@@ -108,6 +108,7 @@ export default function HabitsPage() {
             })
           )}
         </div>
+        </PullToRefresh>
 
         <AddHabitSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
         <EditHabitSheet habit={editing} onClose={() => setEditing(null)} />
