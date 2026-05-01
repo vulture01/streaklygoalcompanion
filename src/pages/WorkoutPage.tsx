@@ -183,6 +183,7 @@ export default function WorkoutPage() {
                 ))
               )}
             </div>
+            </PullToRefresh>
           )}
         </div>
       </div>
