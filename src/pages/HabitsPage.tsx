@@ -15,7 +15,7 @@ import type { Tables } from '@/integrations/supabase/types';
 type Habit = Tables<'habits'>;
 
 export default function HabitsPage() {
-  const { habits, loading, toggleToday, deleteHabit, getCompletionsFor, isCompletedToday } = useHabits();
+  const { habits, loading, toggleToday, deleteHabit, getCompletionsFor, isCompletedToday, refetch } = useHabits();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<Habit | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Habit | null>(null);
@@ -37,18 +37,18 @@ export default function HabitsPage() {
           </button>
         </header>
 
+        <PullToRefresh onRefresh={refetch}>
         <div className="px-5 space-y-3">
           {loading ? (
-            <div className="text-center text-muted-foreground py-12 text-sm">Loading…</div>
+            <ListSkeleton rows={4} />
           ) : habits.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-5xl mb-3">🌱</div>
-              <p className="text-muted-foreground mb-4">No habits yet — add your first one</p>
-              <Button onClick={() => setSheetOpen(true)} className="gradient-primary">
-                <Plus size={18} className="mr-1" />
-                Add Habit
-              </Button>
-            </div>
+            <EmptyState
+              emoji="🌱"
+              title="No habits yet"
+              description="Build daily momentum by adding your first habit."
+              ctaLabel="Add Habit"
+              onCta={() => setSheetOpen(true)}
+            />
           ) : (
             habits.map((habit) => {
               const completed = isCompletedToday(habit.id);
