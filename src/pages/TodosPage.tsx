@@ -4,9 +4,12 @@ import { SwipeableCard } from '@/components/SwipeableCard';
 import { motion } from 'framer-motion';
 import { Check, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { useState } from 'react';
+import { EmptyState } from '@/components/EmptyState';
+import { ListSkeleton } from '@/components/ListSkeleton';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 export default function TodosPage() {
-  const { todos, addTodo, updateTodo, deleteTodo } = useTodos();
+  const { todos, loading, addTodo, updateTodo, deleteTodo, refetch } = useTodos();
   const { goals, refetch: refetchGoals } = useGoals();
   const { addLog } = useLogs();
   const { recalcStreak } = useStreakCalculator();
