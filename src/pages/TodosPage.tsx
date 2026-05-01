@@ -83,8 +83,19 @@ export default function TodosPage() {
           </motion.div>
         )}
 
+        <PullToRefresh onRefresh={refetch}>
         <div className="space-y-2 mb-6">
-          {pending.map((todo, i) => {
+          {loading ? (
+            <ListSkeleton rows={4} />
+          ) : pending.length === 0 && done.length === 0 ? (
+            <EmptyState
+              emoji="✅"
+              title="No tasks yet"
+              description="Add your first task to keep your day on track."
+              ctaLabel="Add Task"
+              onCta={() => setShowAdd(true)}
+            />
+          ) : pending.map((todo, i) => {
             const goal = goals.find(g => g.id === todo.goal_id);
             const isExpanded = expanded === todo.id;
             const subtasks = (todo.subtasks as any[]) || [];
@@ -123,6 +134,7 @@ export default function TodosPage() {
             );
           })}
         </div>
+        </PullToRefresh>
 
         {done.length > 0 && (
           <>
