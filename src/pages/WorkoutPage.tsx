@@ -65,17 +65,18 @@ export default function WorkoutPage() {
           </div>
 
           {tab === 'routines' && (
+            <PullToRefresh onRefresh={refetchRoutines}>
             <div className="space-y-3">
               {routinesLoading ? (
-                <div className="text-center text-muted-foreground py-12 text-sm">Loading…</div>
+                <ListSkeleton rows={3} />
               ) : routines.length === 0 ? (
-                <div className="text-center py-16">
-                  <Dumbbell size={48} className="mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground mb-4">No routines yet</p>
-                  <Button onClick={() => navigate('/workout/new-routine')} className="gradient-primary">
-                    <Plus size={18} className="mr-1" /> Create routine
-                  </Button>
-                </div>
+                <EmptyState
+                  icon={<Dumbbell size={32} className="text-muted-foreground" />}
+                  title="No routines yet"
+                  description="Create a routine like 'Push Day' with your favorite exercises."
+                  ctaLabel="Create routine"
+                  onCta={() => navigate('/workout/new-routine')}
+                />
               ) : (
                 routines.map((r) => {
                   const ex = getExercises(r.id);
@@ -126,17 +127,20 @@ export default function WorkoutPage() {
                 })
               )}
             </div>
+            </PullToRefresh>
           )}
 
           {tab === 'history' && (
+            <PullToRefresh onRefresh={refetchSessions}>
             <div className="space-y-3">
               {sessionsLoading ? (
-                <div className="text-center text-muted-foreground py-12 text-sm">Loading…</div>
+                <ListSkeleton rows={3} />
               ) : sessions.length === 0 ? (
-                <div className="text-center py-16">
-                  <Calendar size={48} className="mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">No workouts logged yet</p>
-                </div>
+                <EmptyState
+                  icon={<Calendar size={32} className="text-muted-foreground" />}
+                  title="No workouts logged yet"
+                  description="Start a quick workout or pick a routine to begin tracking."
+                />
               ) : (
                 sessions.map((s) => (
                   <motion.div
