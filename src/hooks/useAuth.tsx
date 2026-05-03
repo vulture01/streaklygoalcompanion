@@ -1,6 +1,16 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
+import { toast } from 'sonner';
+
+const LAST_ACTIVE_KEY = 'last_active_at';
+const INACTIVITY_LIMIT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+const touchActivity = () => {
+  try {
+    localStorage.setItem(LAST_ACTIVE_KEY, String(Date.now()));
+  } catch {}
+};
 
 interface AuthCtx {
   user: User | null;
