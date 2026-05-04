@@ -13,6 +13,7 @@ import { BottomSheet } from '@/components/BottomSheet';
 import { EmptyState } from '@/components/EmptyState';
 import { ListSkeleton } from '@/components/ListSkeleton';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { GoalsOnboarding } from '@/components/GoalsOnboarding';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Goal = Tables<'goals'>;
