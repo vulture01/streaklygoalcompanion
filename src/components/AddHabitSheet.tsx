@@ -13,17 +13,29 @@ interface Props {
 }
 
 export function AddHabitSheet({ open, onClose }: Props) {
-  const { addHabit } = useHabits();
+  const { habits, addHabit } = useHabits();
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('💧');
   const [frequency, setFrequency] = useState<'daily' | 'weekly'>('daily');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!name.trim() || saving) return;
+    const trimmed = name.trim();
+    if (habits.some(h => h.name.trim().toLowerCase() === trimmed.toLowerCase())) {
+      setError('You already have a habit with this name');
+      return;
+    }
     setSaving(true);
+    setError(null);
     try {
-      await addHabit({ name: name.trim(), icon, frequency });
+      const res = await addHabit({ name: trimmed, icon, frequency });
+      if (res?.error === 'duplicate') {
+        setError('You already have a habit with this name');
+        return;
+      }
+      if (res?.error) return;
       setName('');
       setIcon('💧');
       setFrequency('daily');
