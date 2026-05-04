@@ -75,6 +75,44 @@ export default function ProfilePage() {
     }
   };
 
+  const handleResetAccount = async () => {
+    if (resetting || !user) return;
+    setResetting(true);
+    try {
+      const uid = user.id;
+      const tables = [
+        'session_sets',
+        'workout_sessions',
+        'routine_exercises',
+        'routines',
+        'physique_logs',
+        'todos',
+        'badges',
+        'habit_completions',
+        'habits',
+        'logs',
+        'goals',
+        'ai_usage',
+      ] as const;
+      for (const t of tables) {
+        const { error } = await supabase.from(t as any).delete().eq('user_id', uid);
+        if (error) {
+          console.error(`Reset failed on ${t}:`, error);
+          throw error;
+        }
+      }
+      toast.success('Account reset. Starting fresh!');
+      setResetOpen(false);
+      setResetText('');
+      window.location.href = '/';
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to reset account. Please try again.');
+    } finally {
+      setResetting(false);
+    }
+  };
+
   return (
     <PageTransition>
       <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
