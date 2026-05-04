@@ -177,14 +177,28 @@ export default function ProfilePage() {
             <span className="text-sm text-foreground flex-1 text-left">Sign Out</span>
             <ChevronRight size={16} className="text-muted-foreground" />
           </button>
-          <button
-            onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
-            className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-destructive/40 tap-target mt-4"
-          >
-            <Trash2 size={18} className="text-destructive" />
-            <span className="text-sm text-destructive flex-1 text-left">Delete Account</span>
-            <ChevronRight size={16} className="text-destructive" />
-          </button>
+        </div>
+
+        <div className="mt-8">
+          <h3 className="text-xs uppercase tracking-wider text-destructive font-semibold mb-3 px-1">Danger Zone</h3>
+          <div className="space-y-1">
+            <button
+              onClick={() => { setResetText(''); setResetOpen(true); }}
+              className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-destructive/40 tap-target"
+            >
+              <RotateCcw size={18} className="text-destructive" />
+              <span className="text-sm text-destructive flex-1 text-left">Reset Account</span>
+              <ChevronRight size={16} className="text-destructive" />
+            </button>
+            <button
+              onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
+              className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-destructive/40 tap-target"
+            >
+              <Trash2 size={18} className="text-destructive" />
+              <span className="text-sm text-destructive flex-1 text-left">Delete Account</span>
+              <ChevronRight size={16} className="text-destructive" />
+            </button>
+          </div>
         </div>
       </div>
 
