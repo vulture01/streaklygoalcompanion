@@ -231,6 +231,35 @@ export default function ProfilePage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={resetOpen} onOpenChange={(o) => { if (!resetting) setResetOpen(o); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset your account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all your goals, habits, entries, workouts, todos and progress. This cannot be undone.
+              <br /><br />
+              Type <span className="font-mono font-semibold text-destructive">RESET</span> to confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <input
+            value={resetText}
+            onChange={(e) => setResetText(e.target.value)}
+            placeholder="RESET"
+            className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-destructive font-mono"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetAccount}
+              disabled={resetText !== 'RESET' || resetting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {resetting ? 'Resetting...' : 'Reset Account'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BottomSheet open={groqOpen} onClose={() => setGroqOpen(false)} title="Update Groq API Key">
         <div className="space-y-4">
           <input value={newKey} onChange={(e) => setNewKey(e.target.value)} placeholder="gsk_..."
