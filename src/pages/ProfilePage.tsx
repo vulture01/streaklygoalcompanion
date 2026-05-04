@@ -30,6 +30,9 @@ export default function ProfilePage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetText, setResetText] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   const totalLogs = logs.filter(l => l.completed).length;
   const bestStreak = Math.max(...goals.map(g => g.best_streak), 0);
