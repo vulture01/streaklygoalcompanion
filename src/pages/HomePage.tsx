@@ -67,6 +67,14 @@ export default function HomePage() {
     setPauseGoalId(null);
   };
 
+  if (!goalsLoading && goals.length === 0) {
+    return (
+      <PageTransition>
+        <GoalsOnboarding onComplete={() => { refetchGoals(); }} />
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
