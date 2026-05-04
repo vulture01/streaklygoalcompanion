@@ -63,19 +63,37 @@ export function useGoals() {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at');
-    setGoals(data || []);
+    // Defensive UI dedupe by (user_id, lower(name))
+    const seen = new Set<string>();
+    const unique: Goal[] = [];
+    for (const g of (data || [])) {
+      const key = (g.name || '').trim().toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(g);
+      }
+    }
+    setGoals(unique);
     setLoading(false);
   }, [user]);
 
   useEffect(() => { fetchGoals(); }, [fetchGoals]);
 
   const addGoal = async (goal: Omit<TablesInsert<'goals'>, 'user_id'>) => {
-    if (!user) return;
+    if (!user) return { error: 'No user' as const };
     const { error } = await supabase
       .from('goals')
       .insert({ ...goal, user_id: user.id });
-    if (error) toast.error('Failed to add goal');
-    else await fetchGoals();
+    if (error) {
+      if ((error as any).code === '23505') {
+        toast.error('You already have a goal with this name');
+        return { error: 'duplicate' as const };
+      }
+      toast.error('Failed to add goal');
+      return { error: 'unknown' as const };
+    }
+    await fetchGoals();
+    return { error: null };
   };
 
   const updateGoal = async (id: string, updates: Partial<Goal>) => {

@@ -10,23 +10,36 @@ interface AddGoalSheetProps {
 }
 
 export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
-  const { addGoal } = useGoals();
+  const { goals, addGoal } = useGoals();
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🎯');
   const [type, setType] = useState<'boolean' | 'numeric'>('boolean');
   const [target, setTarget] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!name.trim() || saving) return;
+    const trimmed = name.trim();
+    const dupe = goals.some(g => g.name.trim().toLowerCase() === trimmed.toLowerCase());
+    if (dupe) {
+      setError('You already have a goal with this name');
+      return;
+    }
     setSaving(true);
+    setError(null);
     try {
-      await addGoal({
-        name: name.trim(),
+      const res = await addGoal({
+        name: trimmed,
         emoji,
         type,
         target: type === 'numeric' ? Number(target) || 1 : undefined,
       });
+      if (res?.error === 'duplicate') {
+        setError('You already have a goal with this name');
+        return;
+      }
+      if (res?.error) return;
       setName('');
       setEmoji('🎯');
       setType('boolean');
@@ -42,8 +55,13 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
       <div className="space-y-5">
         <div>
           <label className="text-sm text-muted-foreground mb-2 block">Goal Name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Meditate daily"
-            className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary" />
+          <input
+            value={name}
+            onChange={(e) => { setName(e.target.value); if (error) setError(null); }}
+            placeholder="e.g. Meditate daily"
+            className={`w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 ${error ? 'ring-2 ring-destructive focus:ring-destructive' : 'focus:ring-primary'}`}
+          />
+          {error && <p className="text-xs text-destructive mt-1.5">{error}</p>}
         </div>
         <div>
           <label className="text-sm text-muted-foreground mb-2 block">Icon</label>

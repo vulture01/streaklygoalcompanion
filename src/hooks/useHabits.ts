@@ -62,17 +62,18 @@ export function useHabits() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const addHabit = async (habit: Omit<TablesInsert<'habits'>, 'user_id'>) => {
-    if (!user) return;
+    if (!user) return { error: 'No user' as const };
     const { error } = await supabase.from('habits').insert({ ...habit, user_id: user.id });
     if (error) {
       if ((error as any).code === '23505') {
         toast.error('You already have a habit with that name');
-      } else {
-        toast.error('Failed to add habit');
+        return { error: 'duplicate' as const };
       }
-    } else {
-      await fetchAll();
+      toast.error('Failed to add habit');
+      return { error: 'unknown' as const };
     }
+    await fetchAll();
+    return { error: null };
   };
 
   const updateHabit = async (id: string, updates: Partial<Habit>) => {

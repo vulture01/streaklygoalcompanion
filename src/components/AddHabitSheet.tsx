@@ -13,17 +13,29 @@ interface Props {
 }
 
 export function AddHabitSheet({ open, onClose }: Props) {
-  const { addHabit } = useHabits();
+  const { habits, addHabit } = useHabits();
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('💧');
   const [frequency, setFrequency] = useState<'daily' | 'weekly'>('daily');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!name.trim() || saving) return;
+    const trimmed = name.trim();
+    if (habits.some(h => h.name.trim().toLowerCase() === trimmed.toLowerCase())) {
+      setError('You already have a habit with this name');
+      return;
+    }
     setSaving(true);
+    setError(null);
     try {
-      await addHabit({ name: name.trim(), icon, frequency });
+      const res = await addHabit({ name: trimmed, icon, frequency });
+      if (res?.error === 'duplicate') {
+        setError('You already have a habit with this name');
+        return;
+      }
+      if (res?.error) return;
       setName('');
       setIcon('💧');
       setFrequency('daily');
@@ -40,10 +52,12 @@ export function AddHabitSheet({ open, onClose }: Props) {
           <label className="text-sm font-medium mb-2 block">Name</label>
           <Input
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); if (error) setError(null); }}
             placeholder="e.g. Drink water"
             autoFocus
+            className={error ? 'ring-2 ring-destructive focus-visible:ring-destructive' : ''}
           />
+          {error && <p className="text-xs text-destructive mt-1.5">{error}</p>}
         </div>
 
         <div>
