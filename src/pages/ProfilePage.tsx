@@ -1,7 +1,7 @@
 import { PageTransition } from '@/components/PageTransition';
 import { useProfile, useGoals, useLogs, useBadges } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity } from 'lucide-react';
+import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
