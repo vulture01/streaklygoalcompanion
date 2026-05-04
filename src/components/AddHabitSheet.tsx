@@ -52,10 +52,12 @@ export function AddHabitSheet({ open, onClose }: Props) {
           <label className="text-sm font-medium mb-2 block">Name</label>
           <Input
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); if (error) setError(null); }}
             placeholder="e.g. Drink water"
             autoFocus
+            className={error ? 'ring-2 ring-destructive focus-visible:ring-destructive' : ''}
           />
+          {error && <p className="text-xs text-destructive mt-1.5">{error}</p>}
         </div>
 
         <div>
