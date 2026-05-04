@@ -13,6 +13,7 @@ import { BottomSheet } from '@/components/BottomSheet';
 import { EmptyState } from '@/components/EmptyState';
 import { ListSkeleton } from '@/components/ListSkeleton';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { GoalsOnboarding } from '@/components/GoalsOnboarding';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Goal = Tables<'goals'>;
@@ -65,6 +66,14 @@ export default function HomePage() {
     await updateGoal(pauseGoalId, { paused: true, pause_reason: reason });
     setPauseGoalId(null);
   };
+
+  if (!goalsLoading && goals.length === 0) {
+    return (
+      <PageTransition>
+        <GoalsOnboarding onComplete={() => { refetchGoals(); }} />
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>

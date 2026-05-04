@@ -1,7 +1,7 @@
 import { PageTransition } from '@/components/PageTransition';
 import { useProfile, useGoals, useLogs, useBadges } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity } from 'lucide-react';
+import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -30,6 +30,9 @@ export default function ProfilePage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetText, setResetText] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   const totalLogs = logs.filter(l => l.completed).length;
   const bestStreak = Math.max(...goals.map(g => g.best_streak), 0);
@@ -69,6 +72,44 @@ export default function ProfilePage() {
       console.error(e);
       toast.error('Failed to delete account. Please try again.');
       setDeleting(false);
+    }
+  };
+
+  const handleResetAccount = async () => {
+    if (resetting || !user) return;
+    setResetting(true);
+    try {
+      const uid = user.id;
+      const tables = [
+        'session_sets',
+        'workout_sessions',
+        'routine_exercises',
+        'routines',
+        'physique_logs',
+        'todos',
+        'badges',
+        'habit_completions',
+        'habits',
+        'logs',
+        'goals',
+        'ai_usage',
+      ] as const;
+      for (const t of tables) {
+        const { error } = await supabase.from(t as any).delete().eq('user_id', uid);
+        if (error) {
+          console.error(`Reset failed on ${t}:`, error);
+          throw error;
+        }
+      }
+      toast.success('Account reset. Starting fresh!');
+      setResetOpen(false);
+      setResetText('');
+      window.location.href = '/';
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to reset account. Please try again.');
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -136,14 +177,28 @@ export default function ProfilePage() {
             <span className="text-sm text-foreground flex-1 text-left">Sign Out</span>
             <ChevronRight size={16} className="text-muted-foreground" />
           </button>
-          <button
-            onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
-            className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-destructive/40 tap-target mt-4"
-          >
-            <Trash2 size={18} className="text-destructive" />
-            <span className="text-sm text-destructive flex-1 text-left">Delete Account</span>
-            <ChevronRight size={16} className="text-destructive" />
-          </button>
+        </div>
+
+        <div className="mt-8">
+          <h3 className="text-xs uppercase tracking-wider text-destructive font-semibold mb-3 px-1">Danger Zone</h3>
+          <div className="space-y-1">
+            <button
+              onClick={() => { setResetText(''); setResetOpen(true); }}
+              className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-destructive/40 tap-target"
+            >
+              <RotateCcw size={18} className="text-destructive" />
+              <span className="text-sm text-destructive flex-1 text-left">Reset Account</span>
+              <ChevronRight size={16} className="text-destructive" />
+            </button>
+            <button
+              onClick={() => { setConfirmText(''); setDeleteOpen(true); }}
+              className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-destructive/40 tap-target"
+            >
+              <Trash2 size={18} className="text-destructive" />
+              <span className="text-sm text-destructive flex-1 text-left">Delete Account</span>
+              <ChevronRight size={16} className="text-destructive" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -171,6 +226,35 @@ export default function ProfilePage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleting ? 'Deleting...' : 'Delete Forever'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={resetOpen} onOpenChange={(o) => { if (!resetting) setResetOpen(o); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset your account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all your goals, habits, entries, workouts, todos and progress. This cannot be undone.
+              <br /><br />
+              Type <span className="font-mono font-semibold text-destructive">RESET</span> to confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <input
+            value={resetText}
+            onChange={(e) => setResetText(e.target.value)}
+            placeholder="RESET"
+            className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-destructive font-mono"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetAccount}
+              disabled={resetText !== 'RESET' || resetting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {resetting ? 'Resetting...' : 'Reset Account'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
