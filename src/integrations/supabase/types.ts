@@ -70,6 +70,54 @@ export type Database = {
           },
         ]
       }
+      friend_requests: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: Database["public"]["Enums"]["friend_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: Database["public"]["Enums"]["friend_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: Database["public"]["Enums"]["friend_request_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      friends: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           best_streak: number
@@ -543,13 +591,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_friend_request: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
+      get_leaderboard: {
+        Args: { _weekly?: boolean }
+        Returns: {
+          name: string
+          rank: number
+          total_streak: number
+          user_id: string
+          username: string
+        }[]
+      }
       increment_ai_usage: {
         Args: { _date: string; _user_id: string }
         Returns: undefined
       }
+      search_users_by_username: {
+        Args: { _query: string }
+        Returns: {
+          name: string
+          user_id: string
+          username: string
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      friend_request_status: "pending" | "accepted" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -676,6 +746,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      friend_request_status: ["pending", "accepted", "rejected"],
+    },
   },
 } as const
