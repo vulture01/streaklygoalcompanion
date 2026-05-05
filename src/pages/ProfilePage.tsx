@@ -1,7 +1,7 @@
 import { PageTransition } from '@/components/PageTransition';
 import { useProfile, useGoals, useLogs, useBadges } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity, RotateCcw } from 'lucide-react';
+import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity, RotateCcw, Users, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -123,7 +123,10 @@ export default function ProfilePage() {
             <User size={32} className="text-primary-foreground" />
           </div>
           <h2 className="text-lg font-semibold text-foreground">{profile?.name || 'User'}</h2>
-          <p className="text-sm text-muted-foreground">{user?.email}</p>
+          {(profile as any)?.username && (
+            <p className="text-sm text-primary font-medium">@{(profile as any).username}</p>
+          )}
+          <p className="text-xs text-muted-foreground">{user?.email}</p>
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-8">
@@ -157,6 +160,16 @@ export default function ProfilePage() {
         )}
 
         <div className="space-y-1">
+          <button onClick={() => navigate('/friends')} className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-border tap-target">
+            <Users size={18} className="text-muted-foreground" />
+            <span className="text-sm text-foreground flex-1 text-left">Friends</span>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </button>
+          <button onClick={() => navigate('/leaderboard')} className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-border tap-target">
+            <Trophy size={18} className="text-muted-foreground" />
+            <span className="text-sm text-foreground flex-1 text-left">Leaderboard</span>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </button>
           <button onClick={() => navigate('/profile/physique')} className="w-full flex items-center gap-3 p-4 rounded-lg bg-card border border-border tap-target">
             <Activity size={18} className="text-muted-foreground" />
             <span className="text-sm text-foreground flex-1 text-left">Physique</span>

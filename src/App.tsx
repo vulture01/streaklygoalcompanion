@@ -23,6 +23,9 @@ import NewRoutinePage from "./pages/NewRoutinePage";
 import WorkoutSessionPage from "./pages/WorkoutSessionPage";
 import PhysiquePage from "./pages/PhysiquePage";
 import CoachPage from "./pages/CoachPage";
+import FriendsPage from "./pages/FriendsPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import UsernameSetupPage from "./pages/UsernameSetupPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,11 +62,17 @@ function AppRoutes() {
     return <OnboardingPage onComplete={async () => { await refetch(); setOnboarded(true); }} />;
   }
 
+  if (profile && !(profile as any).username) {
+    return <UsernameSetupPage onComplete={async () => { await refetch(); }} />;
+  }
+
   return (
     <>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/friends" element={<FriendsPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/focus" element={<FocusPage />} />
           <Route path="/todos" element={<TodosPage />} />
           <Route path="/habits" element={<HabitsPage />} />
