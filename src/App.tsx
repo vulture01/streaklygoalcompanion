@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { BottomNav } from "@/components/BottomNav";
+import { PWAPrompts } from "@/components/PWAPrompts";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useSupabaseData";
 import { useState, useEffect } from "react";
@@ -89,6 +90,7 @@ function AppRoutes() {
         </Routes>
       </AnimatePresence>
       <BottomNav />
+      <PWAPrompts />
     </>
   );
 }
