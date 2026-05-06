@@ -83,6 +83,42 @@ serve(async (req) => {
 
     const { type, context, history, message, mode } = await req.json();
 
+    // Input size limits to prevent token-cost abuse on shared key
+    const MAX_CONTEXT = 8000;
+    const MAX_MESSAGE = 2000;
+    const MAX_HISTORY = 20;
+    const MAX_HISTORY_CONTENT = 2000;
+
+    if (typeof context === "string" && context.length > MAX_CONTEXT) {
+      return new Response(JSON.stringify({ error: "Context too large" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (typeof message === "string" && message.length > MAX_MESSAGE) {
+      return new Response(JSON.stringify({ error: "Message too long" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (Array.isArray(history)) {
+      if (history.length > MAX_HISTORY) {
+        return new Response(JSON.stringify({ error: `History too long (max ${MAX_HISTORY})` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const bad = history.find(
+        (m: any) => m && typeof m.content === "string" && m.content.length > MAX_HISTORY_CONTENT,
+      );
+      if (bad) {
+        return new Response(JSON.stringify({ error: "History entry too long" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     let systemPrompt = "";
     let messages: Array<{ role: string; content: string }> = [];
     let maxTokens = 300;
