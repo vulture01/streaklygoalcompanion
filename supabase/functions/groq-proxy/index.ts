@@ -58,15 +58,40 @@ serve(async (req) => {
       systemPrompt?: string;
     };
 
-    // Validate messages shape
+    const MAX_MESSAGES = 20;
+    const MAX_CONTENT = 2000;
+    const MAX_SYSTEM_PROMPT = 4000;
+
+    if (systemPrompt && (typeof systemPrompt !== "string" || systemPrompt.length > MAX_SYSTEM_PROMPT)) {
+      return new Response(JSON.stringify({ error: "System prompt too large" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (messages.length > MAX_MESSAGES) {
+      return new Response(JSON.stringify({ error: `Too many messages (max ${MAX_MESSAGES})` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate messages shape and length
     const cleanMessages = messages.filter(
       (m) =>
         m &&
         typeof m.content === "string" &&
+        m.content.length <= MAX_CONTENT &&
         ["system", "user", "assistant"].includes(m.role),
     );
     if (cleanMessages.length === 0) {
-      return new Response(JSON.stringify({ error: "No valid messages" }), {
+      return new Response(JSON.stringify({ error: "No valid messages (each content must be <= 2000 chars)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (cleanMessages.length !== messages.length) {
+      return new Response(JSON.stringify({ error: "One or more messages exceed 2000 chars or have invalid role" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
