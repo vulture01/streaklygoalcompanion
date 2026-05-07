@@ -193,7 +193,8 @@ export default function GoalDetailPage() {
         </div>
 
         <button onClick={() => setLogOpen(true)}
-          className="fixed bottom-24 right-4 w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-lg glow-violet z-40">
+          style={{ bottom: 'calc(var(--nav-height) + var(--safe-bottom) + 16px)' }}
+          className="fixed right-4 w-14 h-14 rounded-full gradient-primary flex items-center justify-center shadow-lg glow-violet z-40">
           <span className="text-primary-foreground text-2xl">+</span>
         </button>
 
