@@ -54,7 +54,7 @@ export default function TodosPage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
+      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-foreground">To-Do</h1>
           <button onClick={() => setShowAdd(!showAdd)} className="tap-target text-primary"><Plus size={22} /></button>

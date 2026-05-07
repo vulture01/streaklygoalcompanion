@@ -37,7 +37,7 @@ export default function FocusPage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-16 pb-24 max-w-lg mx-auto flex flex-col min-h-screen">
+      <div className="px-4 pt-16 safe-bottom max-w-lg mx-auto flex flex-col min-h-screen">
         <div className="text-center mb-10">
           <h1 className="text-2xl font-bold text-foreground mb-1">Focus Mode</h1>
           <p className="text-sm text-muted-foreground">Complete today's goals. Nothing else.</p>

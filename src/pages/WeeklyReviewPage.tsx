@@ -34,7 +34,7 @@ export default function WeeklyReviewPage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
+      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate(-1)} className="tap-target"><ArrowLeft size={22} className="text-foreground" /></button>
           <h1 className="text-xl font-bold text-foreground">Weekly Review</h1>
