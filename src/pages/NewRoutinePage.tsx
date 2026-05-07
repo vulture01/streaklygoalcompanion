@@ -82,7 +82,7 @@ export default function NewRoutinePage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen pb-24" style={{ paddingTop: 'var(--safe-top)' }}>
+      <div className="min-h-screen safe-bottom" style={{ paddingTop: 'var(--safe-top)' }}>
         <header className="px-5 pt-6 pb-4 flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}

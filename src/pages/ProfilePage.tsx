@@ -115,7 +115,7 @@ export default function ProfilePage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
+      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto">
         <h1 className="text-2xl font-bold text-foreground mb-6">Profile</h1>
 
         <div className="flex flex-col items-center mb-8">

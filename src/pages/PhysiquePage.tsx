@@ -89,7 +89,7 @@ export default function PhysiquePage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
+      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
           <button onClick={() => navigate(-1)} className="tap-target -ml-2">
             <ArrowLeft size={22} className="text-foreground" />

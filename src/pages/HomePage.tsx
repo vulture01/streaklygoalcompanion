@@ -77,7 +77,7 @@ export default function HomePage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 pb-24 max-w-lg mx-auto">
+      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-sm text-muted-foreground">Good {getGreeting()},</p>
