@@ -22,7 +22,7 @@ export default function HabitsPage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen pb-24" style={{ paddingTop: 'var(--safe-top)' }}>
+      <div className="min-h-screen safe-bottom" style={{ paddingTop: 'var(--safe-top)' }}>
         <header className="px-5 pt-6 pb-4 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Habits</h1>
