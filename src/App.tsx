@@ -28,6 +28,7 @@ import FriendsPage from "./pages/FriendsPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import UsernameSetupPage from "./pages/UsernameSetupPage";
 import NotFound from "./pages/NotFound";
+import TrustPage from "./pages/TrustPage";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ function AppRoutes() {
           <Route path="/profile/physique" element={<PhysiquePage />} />
           <Route path="/goal/:id" element={<GoalDetailPage />} />
           <Route path="/weekly-review" element={<WeeklyReviewPage />} />
+          <Route path="/trust" element={<TrustPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AnimatePresence>
