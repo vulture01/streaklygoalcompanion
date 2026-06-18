@@ -87,6 +87,7 @@ function AppRoutes() {
           <Route path="/profile/physique" element={<PhysiquePage />} />
           <Route path="/goal/:id" element={<GoalDetailPage />} />
           <Route path="/weekly-review" element={<WeeklyReviewPage />} />
+          <Route path="/trust" element={<TrustPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AnimatePresence>
