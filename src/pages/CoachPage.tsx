@@ -14,8 +14,9 @@ import { PageTransition } from '@/components/PageTransition';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
-export default function CoachPage() {
+export default function CoachPage({ onClose, embedded = false }: { onClose?: () => void; embedded?: boolean } = {}) {
   const navigate = useNavigate();
+  const handleBack = () => { if (onClose) onClose(); else navigate(-1); };
   const { user } = useAuth();
   const { goals } = useGoals();
   const { habits, completions } = useHabits();
