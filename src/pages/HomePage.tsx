@@ -77,7 +77,7 @@ export default function HomePage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto">
+      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-sm text-muted-foreground">Good {getGreeting()},</p>
@@ -100,17 +100,19 @@ export default function HomePage() {
         </div>
 
         <PullToRefresh onRefresh={async () => { await refetchGoals(); await refetchLogs(); }}>
-        <div className="space-y-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 mb-6">
           {goalsLoading ? (
             <ListSkeleton rows={3} />
           ) : goals.filter(g => !g.paused).length === 0 ? (
-            <EmptyState
-              emoji="🎯"
-              title="No active goals"
-              description="Set your first goal and start your streak today."
-              ctaLabel="Create Goal"
-              onCta={() => setAddOpen(true)}
-            />
+            <div className="sm:col-span-2">
+              <EmptyState
+                emoji="🎯"
+                title="No active goals"
+                description="Set your first goal and start your streak today."
+                ctaLabel="Create Goal"
+                onCta={() => setAddOpen(true)}
+              />
+            </div>
           ) : (
             goals.filter(g => !g.paused).map((goal, i) => (
               <SwipeableCard

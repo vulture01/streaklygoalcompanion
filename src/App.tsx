@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { BottomNav } from "@/components/BottomNav";
+import { DesktopSidebar } from "@/components/DesktopSidebar";
 import { PWAPrompts } from "@/components/PWAPrompts";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useSupabaseData";
@@ -71,28 +72,31 @@ function AppRoutes() {
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/friends" element={<FriendsPage />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/focus" element={<FocusPage />} />
-          <Route path="/track" element={<TrackPage />} />
-          <Route path="/todos" element={<TodosPage />} />
-          <Route path="/habits" element={<HabitsPage />} />
-          <Route path="/workout" element={<WorkoutPage />} />
-          <Route path="/workout/new-routine" element={<NewRoutinePage />} />
-          <Route path="/workout/session/:id" element={<WorkoutSessionPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/coach" element={<CoachPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/profile/physique" element={<PhysiquePage />} />
-          <Route path="/goal/:id" element={<GoalDetailPage />} />
-          <Route path="/weekly-review" element={<WeeklyReviewPage />} />
-          <Route path="/trust" element={<TrustPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AnimatePresence>
+      <DesktopSidebar />
+      <div className="lg:pl-[220px]">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/friends" element={<FriendsPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/focus" element={<FocusPage />} />
+            <Route path="/track" element={<TrackPage />} />
+            <Route path="/todos" element={<TodosPage />} />
+            <Route path="/habits" element={<HabitsPage />} />
+            <Route path="/workout" element={<WorkoutPage />} />
+            <Route path="/workout/new-routine" element={<NewRoutinePage />} />
+            <Route path="/workout/session/:id" element={<WorkoutSessionPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/coach" element={<CoachPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/physique" element={<PhysiquePage />} />
+            <Route path="/goal/:id" element={<GoalDetailPage />} />
+            <Route path="/weekly-review" element={<WeeklyReviewPage />} />
+            <Route path="/trust" element={<TrustPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AnimatePresence>
+      </div>
       <BottomNav />
       <PWAPrompts />
     </>

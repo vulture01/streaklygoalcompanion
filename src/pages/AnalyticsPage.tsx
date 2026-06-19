@@ -49,7 +49,7 @@ export default function AnalyticsPage() {
 
   return (
     <PageTransition>
-      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto">
+      <div className="px-4 pt-12 safe-bottom max-w-lg mx-auto w-full">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
           <button onClick={handleExport} className="tap-target flex items-center gap-1 text-sm text-primary font-medium">
