@@ -149,9 +149,9 @@ Physique: ${physiqueTrend}`;
     if (reply) setMessages((m) => [...m, { role: 'assistant', content: reply }]);
   };
 
-  return (
-    <PageTransition>
-      <div className="min-h-screen flex flex-col bg-background">
+  const content = (
+      <div className={`${embedded ? 'h-full' : 'min-h-screen'} flex flex-col bg-background`}>
+
         {/* Header */}
         <header
           className="sticky top-0 z-40 bg-card/95 backdrop-blur-lg border-b border-border"
