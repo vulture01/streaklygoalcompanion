@@ -1,13 +1,10 @@
-import { Home, Repeat, Dumbbell, CheckSquare, BarChart3, User, Sparkles } from 'lucide-react';
+import { Home, Target, BarChart3, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Home' },
-  { path: '/habits', icon: Repeat, label: 'Habits' },
-  { path: '/workout', icon: Dumbbell, label: 'Workout' },
-  { path: '/coach', icon: Sparkles, label: 'Coach' },
-  { path: '/todos', icon: CheckSquare, label: 'To-Do' },
+  { path: '/track', icon: Target, label: 'Track' },
   { path: '/analytics', icon: BarChart3, label: 'Stats' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
