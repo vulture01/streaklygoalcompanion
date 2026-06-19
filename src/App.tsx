@@ -99,6 +99,7 @@ function AppRoutes() {
         </AnimatePresence>
       </div>
       <BottomNav />
+      <CoachFab />
       <PWAPrompts />
     </>
   );
