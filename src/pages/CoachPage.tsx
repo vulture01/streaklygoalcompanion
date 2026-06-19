@@ -241,8 +241,8 @@ Physique: ${physiqueTrend}`;
 
         {/* Composer */}
         <div
-          className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-lg border-t border-border"
-          style={{ paddingBottom: 'calc(var(--safe-bottom) + 64px)' }}
+          className={`${embedded ? 'sticky bottom-0' : 'fixed bottom-0 left-0 right-0'} z-40 bg-card/95 backdrop-blur-lg border-t border-border`}
+          style={embedded ? undefined : { paddingBottom: 'calc(var(--safe-bottom) + 64px)' }}
         >
           <div className="flex items-center gap-2 px-4 py-3 max-w-lg mx-auto">
             <input
@@ -264,6 +264,8 @@ Physique: ${physiqueTrend}`;
           </div>
         </div>
       </div>
-    </PageTransition>
   );
+
+  return embedded ? content : <PageTransition>{content}</PageTransition>;
 }
+
