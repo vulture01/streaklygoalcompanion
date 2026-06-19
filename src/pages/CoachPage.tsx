@@ -14,8 +14,9 @@ import { PageTransition } from '@/components/PageTransition';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
-export default function CoachPage() {
+export default function CoachPage({ onClose, embedded = false }: { onClose?: () => void; embedded?: boolean } = {}) {
   const navigate = useNavigate();
+  const handleBack = () => { if (onClose) onClose(); else navigate(-1); };
   const { user } = useAuth();
   const { goals } = useGoals();
   const { habits, completions } = useHabits();
@@ -148,16 +149,16 @@ Physique: ${physiqueTrend}`;
     if (reply) setMessages((m) => [...m, { role: 'assistant', content: reply }]);
   };
 
-  return (
-    <PageTransition>
-      <div className="min-h-screen flex flex-col bg-background">
+  const content = (
+      <div className={`${embedded ? 'h-full' : 'min-h-screen'} flex flex-col bg-background`}>
+
         {/* Header */}
         <header
           className="sticky top-0 z-40 bg-card/95 backdrop-blur-lg border-b border-border"
           style={{ paddingTop: 'var(--safe-top)' }}
         >
           <div className="flex items-center gap-3 px-4 h-14 max-w-lg mx-auto">
-            <button onClick={() => navigate(-1)} className="tap-target -ml-2">
+            <button onClick={handleBack} className="tap-target -ml-2" aria-label="Close coach">
               <ArrowLeft size={22} className="text-foreground" />
             </button>
             <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
@@ -240,8 +241,8 @@ Physique: ${physiqueTrend}`;
 
         {/* Composer */}
         <div
-          className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-lg border-t border-border"
-          style={{ paddingBottom: 'calc(var(--safe-bottom) + 64px)' }}
+          className={`${embedded ? 'sticky bottom-0' : 'fixed bottom-0 left-0 right-0'} z-40 bg-card/95 backdrop-blur-lg border-t border-border`}
+          style={embedded ? undefined : { paddingBottom: 'calc(var(--safe-bottom) + 64px)' }}
         >
           <div className="flex items-center gap-2 px-4 py-3 max-w-lg mx-auto">
             <input
@@ -263,6 +264,8 @@ Physique: ${physiqueTrend}`;
           </div>
         </div>
       </div>
-    </PageTransition>
   );
+
+  return embedded ? content : <PageTransition>{content}</PageTransition>;
 }
+

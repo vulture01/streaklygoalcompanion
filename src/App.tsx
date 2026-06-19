@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence } from "framer-motion";
 import { BottomNav } from "@/components/BottomNav";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
+import { CoachFab } from "@/components/CoachFab";
 import { PWAPrompts } from "@/components/PWAPrompts";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useSupabaseData";
@@ -98,6 +99,7 @@ function AppRoutes() {
         </AnimatePresence>
       </div>
       <BottomNav />
+      <CoachFab />
       <PWAPrompts />
     </>
   );
