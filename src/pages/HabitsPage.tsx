@@ -22,7 +22,7 @@ export default function HabitsPage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen safe-bottom" style={{ paddingTop: 'var(--safe-top)' }}>
+      <div className="min-h-screen safe-bottom max-w-lg mx-auto w-full" style={{ paddingTop: 'var(--safe-top)' }}>
         <header className="px-5 pt-6 pb-4 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Habits</h1>
@@ -38,7 +38,7 @@ export default function HabitsPage() {
         </header>
 
         <PullToRefresh onRefresh={refetch}>
-        <div className="px-5 space-y-3">
+        <div className="px-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {loading ? (
             <ListSkeleton rows={4} />
           ) : habits.length === 0 ? (
