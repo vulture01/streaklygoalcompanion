@@ -29,6 +29,7 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import UsernameSetupPage from "./pages/UsernameSetupPage";
 import NotFound from "./pages/NotFound";
 import TrustPage from "./pages/TrustPage";
+import TrackPage from "./pages/TrackPage";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ function AppRoutes() {
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/focus" element={<FocusPage />} />
+          <Route path="/track" element={<TrackPage />} />
           <Route path="/todos" element={<TodosPage />} />
           <Route path="/habits" element={<HabitsPage />} />
           <Route path="/workout" element={<WorkoutPage />} />
