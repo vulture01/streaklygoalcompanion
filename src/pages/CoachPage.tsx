@@ -158,7 +158,7 @@ Physique: ${physiqueTrend}`;
           style={{ paddingTop: 'var(--safe-top)' }}
         >
           <div className="flex items-center gap-3 px-4 h-14 max-w-lg mx-auto">
-            <button onClick={() => navigate(-1)} className="tap-target -ml-2">
+            <button onClick={handleBack} className="tap-target -ml-2" aria-label="Close coach">
               <ArrowLeft size={22} className="text-foreground" />
             </button>
             <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
