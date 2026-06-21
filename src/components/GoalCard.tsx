@@ -17,8 +17,11 @@ interface GoalCardProps {
   onLog?: (goal: Goal) => void;
 }
 
-export function GoalCard({ goal, logs, index, onEdit, onDelete }: GoalCardProps) {
+export function GoalCard({ goal, logs, index, onEdit, onDelete, onLog }: GoalCardProps) {
   const navigate = useNavigate();
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const loggedToday = logs.some((l) => l.date === todayStr && l.completed);
 
   const last7 = logs.filter((l) => {
     const d = new Date(l.date);
@@ -85,6 +88,25 @@ export function GoalCard({ goal, logs, index, onEdit, onDelete }: GoalCardProps)
           </div>
         )}
       </div>
+      {onLog && (
+        <button
+          onClick={(e) => { stop(e); onLog(goal); }}
+          disabled={loggedToday}
+          className={`mt-3 w-full py-2.5 rounded-lg text-sm font-semibold tap-target transition-opacity ${
+            loggedToday
+              ? 'bg-secondary text-muted-foreground cursor-default'
+              : 'gradient-primary text-primary-foreground'
+          }`}
+        >
+          {loggedToday ? (
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <Check size={16} /> Logged today
+            </span>
+          ) : (
+            'Log Today'
+          )}
+        </button>
+      )}
     </motion.div>
   );
 }
