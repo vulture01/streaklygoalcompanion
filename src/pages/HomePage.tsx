@@ -4,7 +4,8 @@ import { WeeklySummaryBar } from '@/components/WeeklySummaryBar';
 import { useGoals, useLogs, useTodos, useProfile, useBadges, useStreakCalculator } from '@/hooks/useSupabaseData';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
-import { Plus, Bell } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { NotificationsBell } from '@/components/NotificationsBell';
 import { useState } from 'react';
 import { AddGoalSheet } from '@/components/AddGoalSheet';
 import { EditGoalSheet } from '@/components/EditGoalSheet';
@@ -83,9 +84,8 @@ export default function HomePage() {
             <p className="text-sm text-muted-foreground">Good {getGreeting()},</p>
             <h1 className="text-2xl font-bold text-foreground">{profile?.name || 'User'} 👋</h1>
           </div>
-          <button className="tap-target flex items-center justify-center rounded-full bg-secondary w-10 h-10">
-            <Bell size={18} className="text-muted-foreground" />
-          </button>
+          <NotificationsBell />
+
         </div>
 
         <div className="mb-5">
@@ -128,6 +128,7 @@ export default function HomePage() {
                   index={i}
                   onEdit={(g) => setEditingGoal(g)}
                   onDelete={(g) => setDeletingGoal(g)}
+                  onLog={(g) => setLogGoalId(g.id)}
                 />
               </SwipeableCard>
             ))
@@ -152,7 +153,18 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Floating quick-add FAB */}
+      <button
+        onClick={() => setAddOpen(true)}
+        aria-label="Add new goal"
+        className="fixed right-4 lg:right-6 z-40 w-14 h-14 rounded-full gradient-primary shadow-xl flex items-center justify-center tap-target active:scale-95 transition-transform"
+        style={{ bottom: 'calc(var(--safe-bottom) + 152px)' }}
+      >
+        <Plus size={26} className="text-primary-foreground" />
+      </button>
+
       {/* Log Sheet */}
+
       <BottomSheet open={!!logGoalId} onClose={() => setLogGoalId(null)} title="Quick Log">
         <div className="space-y-4">
           <textarea

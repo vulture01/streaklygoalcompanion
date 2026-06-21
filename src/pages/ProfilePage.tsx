@@ -1,11 +1,11 @@
 import { PageTransition } from '@/components/PageTransition';
 import { useProfile, useGoals, useLogs, useBadges } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity, RotateCcw, Users, Trophy } from 'lucide-react';
+import { User, Download, LogOut, ChevronRight, Key, Trash2, Activity, RotateCcw, Users, Trophy, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { BottomSheet } from '@/components/BottomSheet';
 import {
   AlertDialog,
@@ -33,6 +33,52 @@ export default function ProfilePage() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetText, setResetText] = useState('');
   const [resetting, setResetting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const avatarPath = (profile as any)?.avatar_url as string | undefined;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!avatarPath) { setAvatarUrl(null); return; }
+      const { data } = await supabase.storage.from('avatars').createSignedUrl(avatarPath, 60 * 60);
+      if (!cancelled) setAvatarUrl(data?.signedUrl ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [avatarPath]);
+
+  const handleAvatarClick = () => fileInputRef.current?.click();
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !user) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const path = `${user.id}/avatar.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      await updateProfile({ avatar_url: path } as any);
+      toast.success('Profile photo updated');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const totalLogs = logs.filter(l => l.completed).length;
   const bestStreak = Math.max(...goals.map(g => g.best_streak), 0);
@@ -119,9 +165,36 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-bold text-foreground mb-6">Profile</h1>
 
         <div className="flex flex-col items-center mb-8">
-          <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-3">
-            <User size={32} className="text-primary-foreground" />
-          </div>
+          <button
+            type="button"
+            onClick={handleAvatarClick}
+            disabled={uploadingAvatar}
+            className="group relative w-20 h-20 rounded-full overflow-hidden mb-3 tap-target focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Change profile photo"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full gradient-primary flex items-center justify-center">
+                <User size={32} className="text-primary-foreground" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 group-focus:opacity-100 flex items-center justify-center transition-opacity">
+              <Camera size={20} className="text-white" />
+            </div>
+            {uploadingAvatar && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
           <h2 className="text-lg font-semibold text-foreground">{profile?.name || 'User'}</h2>
           {(profile as any)?.username && (
             <p className="text-sm text-primary font-medium">@{(profile as any).username}</p>
