@@ -331,6 +331,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           calorie_target: number | null
           carbs_target: number | null
           created_at: string
@@ -347,6 +348,7 @@ export type Database = {
           wake_up_time: string | null
         }
         Insert: {
+          avatar_url?: string | null
           calorie_target?: number | null
           carbs_target?: number | null
           created_at?: string
@@ -363,6 +365,7 @@ export type Database = {
           wake_up_time?: string | null
         }
         Update: {
+          avatar_url?: string | null
           calorie_target?: number | null
           carbs_target?: number | null
           created_at?: string
