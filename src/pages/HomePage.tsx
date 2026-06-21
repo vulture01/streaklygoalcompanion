@@ -153,7 +153,18 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Floating quick-add FAB */}
+      <button
+        onClick={() => setAddOpen(true)}
+        aria-label="Add new goal"
+        className="fixed right-4 lg:right-6 z-40 w-14 h-14 rounded-full gradient-primary shadow-xl flex items-center justify-center tap-target active:scale-95 transition-transform"
+        style={{ bottom: 'calc(var(--safe-bottom) + 152px)' }}
+      >
+        <Plus size={26} className="text-primary-foreground" />
+      </button>
+
       {/* Log Sheet */}
+
       <BottomSheet open={!!logGoalId} onClose={() => setLogGoalId(null)} title="Quick Log">
         <div className="space-y-4">
           <textarea
