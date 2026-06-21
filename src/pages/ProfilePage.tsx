@@ -165,9 +165,36 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-bold text-foreground mb-6">Profile</h1>
 
         <div className="flex flex-col items-center mb-8">
-          <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-3">
-            <User size={32} className="text-primary-foreground" />
-          </div>
+          <button
+            type="button"
+            onClick={handleAvatarClick}
+            disabled={uploadingAvatar}
+            className="group relative w-20 h-20 rounded-full overflow-hidden mb-3 tap-target focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Change profile photo"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full gradient-primary flex items-center justify-center">
+                <User size={32} className="text-primary-foreground" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 group-focus:opacity-100 flex items-center justify-center transition-opacity">
+              <Camera size={20} className="text-white" />
+            </div>
+            {uploadingAvatar && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
           <h2 className="text-lg font-semibold text-foreground">{profile?.name || 'User'}</h2>
           {(profile as any)?.username && (
             <p className="text-sm text-primary font-medium">@{(profile as any).username}</p>
