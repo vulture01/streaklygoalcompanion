@@ -33,6 +33,52 @@ export default function ProfilePage() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetText, setResetText] = useState('');
   const [resetting, setResetting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const avatarPath = (profile as any)?.avatar_url as string | undefined;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!avatarPath) { setAvatarUrl(null); return; }
+      const { data } = await supabase.storage.from('avatars').createSignedUrl(avatarPath, 60 * 60);
+      if (!cancelled) setAvatarUrl(data?.signedUrl ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [avatarPath]);
+
+  const handleAvatarClick = () => fileInputRef.current?.click();
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !user) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const path = `${user.id}/avatar.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      await updateProfile({ avatar_url: path } as any);
+      toast.success('Profile photo updated');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const totalLogs = logs.filter(l => l.completed).length;
   const bestStreak = Math.max(...goals.map(g => g.best_streak), 0);
