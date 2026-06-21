@@ -128,6 +128,7 @@ export default function HomePage() {
                   index={i}
                   onEdit={(g) => setEditingGoal(g)}
                   onDelete={(g) => setDeletingGoal(g)}
+                  onLog={(g) => setLogGoalId(g.id)}
                 />
               </SwipeableCard>
             ))
