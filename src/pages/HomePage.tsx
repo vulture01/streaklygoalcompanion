@@ -84,9 +84,8 @@ export default function HomePage() {
             <p className="text-sm text-muted-foreground">Good {getGreeting()},</p>
             <h1 className="text-2xl font-bold text-foreground">{profile?.name || 'User'} 👋</h1>
           </div>
-          <button className="tap-target flex items-center justify-center rounded-full bg-secondary w-10 h-10">
-            <Bell size={18} className="text-muted-foreground" />
-          </button>
+          <NotificationsBell />
+
         </div>
 
         <div className="mb-5">
