@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ProgressRing } from './ProgressRing';
 import { HeatmapStrip } from './HeatmapStrip';
-import { Flame, Pause, Pencil, Trash2 } from 'lucide-react';
+import { Flame, Pause, Pencil, Trash2, Check } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +14,7 @@ interface GoalCardProps {
   index: number;
   onEdit?: (goal: Goal) => void;
   onDelete?: (goal: Goal) => void;
+  onLog?: (goal: Goal) => void;
 }
 
 export function GoalCard({ goal, logs, index, onEdit, onDelete }: GoalCardProps) {
