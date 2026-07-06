@@ -42,7 +42,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                 </button>
               </div>
             )}
-            <div className="px-5 pb-6">
+            <div className="px-5" style={{ paddingBottom: 'calc(var(--safe-bottom) + 80px)' }}>
               {children}
             </div>
           </motion.div>
