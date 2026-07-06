@@ -22,12 +22,14 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
             onClick={onClose}
           />
           <motion.div
+            role="dialog"
+            data-state="open"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl max-h-[85vh] overflow-y-auto"
-            style={{ paddingBottom: 'var(--safe-bottom)' }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl overflow-y-auto"
+            style={{ maxHeight: 'calc(100vh - var(--safe-top) - 80px)' }}
           >
             <div className="flex justify-center pt-3 pb-2">
               <div className="w-10 h-1 rounded-full bg-muted" />
