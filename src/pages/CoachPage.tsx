@@ -157,9 +157,16 @@ Physique: ${physiqueTrend}`;
           className="sticky top-0 z-40 bg-card/95 backdrop-blur-lg border-b border-border"
           style={{ paddingTop: 'var(--safe-top)' }}
         >
-          <div className="flex items-center gap-3 px-4 h-14 max-w-lg mx-auto">
-            <button onClick={handleBack} className="tap-target -ml-2" aria-label="Close coach">
-              <ArrowLeft size={22} className="text-foreground" />
+          <div
+            className="flex items-center gap-3 h-14 max-w-lg mx-auto"
+            style={{ paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 16px)', paddingRight: 'calc(env(safe-area-inset-right, 0px) + 16px)' }}
+          >
+            <button
+              onClick={handleBack}
+              className="w-11 h-11 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center flex-shrink-0 tap-target"
+              aria-label="Close coach"
+            >
+              <ArrowLeft size={20} className="text-foreground" />
             </button>
             <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center">
               <Bot size={18} className="text-primary-foreground" />

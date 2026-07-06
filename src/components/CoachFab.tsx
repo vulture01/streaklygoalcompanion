@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -6,10 +6,26 @@ import CoachPage from '@/pages/CoachPage';
 
 export function CoachFab() {
   const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const { pathname } = useLocation();
+
+  // Hide FAB when any Radix/Vaul dialog, sheet, or drawer is open
+  useEffect(() => {
+    const check = () => {
+      const hasOpenOverlay = !!document.querySelector(
+        '[role="dialog"][data-state="open"], [data-vaul-drawer][data-state="open"]'
+      );
+      setModalOpen(hasOpenOverlay);
+    };
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-state', 'style'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Hide on the standalone Coach route to avoid duplicate UI
   if (pathname.startsWith('/coach')) return null;
+  if (modalOpen && !open) return null;
 
   return (
     <>
