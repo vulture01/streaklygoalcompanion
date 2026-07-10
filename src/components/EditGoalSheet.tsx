@@ -18,6 +18,7 @@ export function EditGoalSheet({ goal, onClose }: Props) {
   const [emoji, setEmoji] = useState('🎯');
   const [type, setType] = useState<'boolean' | 'numeric'>('boolean');
   const [target, setTarget] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -26,6 +27,8 @@ export function EditGoalSheet({ goal, onClose }: Props) {
       setEmoji(goal.emoji);
       setType((goal.type as 'boolean' | 'numeric') || 'boolean');
       setTarget(goal.target ? String(goal.target) : '');
+      const rt = (goal as any).reminder_time as string | null | undefined;
+      setReminderTime(rt ? rt.split(':').slice(0, 2).join(':') : '');
     }
   }, [goal]);
 
@@ -38,7 +41,8 @@ export function EditGoalSheet({ goal, onClose }: Props) {
         emoji,
         type,
         target: type === 'numeric' ? Number(target) || 1 : null,
-      });
+        reminder_time: reminderTime ? `${reminderTime}:00` : null,
+      } as any);
       onClose();
     } finally {
       setSaving(false);
