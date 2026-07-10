@@ -46,6 +46,21 @@ export default function HomePage() {
   const todayStr = new Date().toISOString().split('T')[0];
   const todayTodos = todos.filter((t) => !t.completed).slice(0, 3);
 
+  // Handle notification click routing: /?remind=goal:<id>
+  useEffect(() => {
+    if (goalsLoading) return;
+    const params = new URLSearchParams(location.search);
+    const remind = params.get('remind');
+    if (!remind) return;
+    const [kind, id] = remind.split(':');
+    if (kind === 'goal' && id && goals.some((g) => g.id === id)) {
+      setLogGoalId(id);
+    }
+    // Clear param so it doesn't retrigger
+    navigate('/', { replace: true });
+  }, [location.search, goalsLoading, goals, navigate]);
+
+
   const handleLog = async () => {
     if (!logGoalId) return;
     await addLog({
