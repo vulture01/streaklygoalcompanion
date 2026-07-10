@@ -15,6 +15,7 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
   const [emoji, setEmoji] = useState('🎯');
   const [type, setType] = useState<'boolean' | 'numeric'>('boolean');
   const [target, setTarget] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +35,8 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
         emoji,
         type,
         target: type === 'numeric' ? Number(target) || 1 : undefined,
-      });
+        reminder_time: reminderTime ? `${reminderTime}:00` : null,
+      } as any);
       if (res?.error === 'duplicate') {
         setError('You already have a goal with this name');
         return;
@@ -44,6 +46,7 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
       setEmoji('🎯');
       setType('boolean');
       setTarget('');
+      setReminderTime('');
       onClose();
     } finally {
       setSaving(false);
