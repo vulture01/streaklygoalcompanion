@@ -209,6 +209,7 @@ export type Database = {
           icon: string
           id: string
           name: string
+          reminder_time: string | null
           streak: number
           updated_at: string
           user_id: string
@@ -220,6 +221,7 @@ export type Database = {
           icon?: string
           id?: string
           name: string
+          reminder_time?: string | null
           streak?: number
           updated_at?: string
           user_id: string
@@ -231,6 +233,7 @@ export type Database = {
           icon?: string
           id?: string
           name?: string
+          reminder_time?: string | null
           streak?: number
           updated_at?: string
           user_id?: string
