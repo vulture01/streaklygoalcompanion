@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Plus, Flame, Check, Trash2, Pencil } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageTransition } from '@/components/PageTransition';
@@ -19,6 +21,32 @@ export default function HabitsPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<Habit | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Habit | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Notification click routing: /track?remind=habit:<id>
+  useEffect(() => {
+    if (loading) return;
+    const params = new URLSearchParams(location.search);
+    const remind = params.get('remind');
+    if (!remind) return;
+    const [kind, id] = remind.split(':');
+    if (kind === 'habit' && id) {
+      const habit = habits.find((h) => h.id === id);
+      if (habit) {
+        if (!isCompletedToday(id)) {
+          toggleToday(id);
+          toast.success(`Logged "${habit.name}" for today`);
+        }
+        // Scroll into view after render
+        setTimeout(() => {
+          document.getElementById(`habit-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+    navigate(location.pathname, { replace: true });
+  }, [location.search, location.pathname, loading, habits, isCompletedToday, toggleToday, navigate]);
+
 
   return (
     <PageTransition>
