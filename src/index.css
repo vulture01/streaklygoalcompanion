@@ -65,14 +65,16 @@
   html, body {
     @apply bg-background text-foreground antialiased;
     -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
   }
   html {
     overflow-x: hidden;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   body {
     overflow-x: hidden;
-    overscroll-behavior-y: none;
+    overflow-y: visible;
     min-height: 100vh;
   }
   html {
