@@ -73,6 +73,12 @@ function AppRoutes() {
     return <UsernameSetupPage onComplete={async () => { await refetch(); }} />;
   }
 
+  return <AuthedApp />;
+}
+
+function AuthedApp() {
+  const location = useLocation();
+  useReminderScheduler();
   return (
     <>
       <DesktopSidebar />
@@ -103,6 +109,7 @@ function AppRoutes() {
       <BottomNav />
       <CoachFab />
       <PWAPrompts />
+      <NotificationPermissionPrompt />
     </>
   );
 }
