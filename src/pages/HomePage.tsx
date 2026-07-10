@@ -28,6 +28,8 @@ export default function HomePage() {
   const { goals, loading: goalsLoading, updateGoal, deleteGoal, refetch: refetchGoals } = useGoals();
   const { logs, addLog, refetch: refetchLogs } = useLogs();
   const { todos } = useTodos();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { profile } = useProfile();
   const { checkAndAwardBadge } = useBadges();
   const { recalcStreak } = useStreakCalculator();
