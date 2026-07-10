@@ -7,6 +7,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 import { CoachFab } from "@/components/CoachFab";
 import { PWAPrompts } from "@/components/PWAPrompts";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
+import { useReminderScheduler } from "@/hooks/useReminders";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useSupabaseData";
 import { useState, useEffect } from "react";
