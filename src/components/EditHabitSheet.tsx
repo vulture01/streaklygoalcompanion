@@ -20,6 +20,7 @@ export function EditHabitSheet({ habit, onClose }: Props) {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('💧');
   const [frequency, setFrequency] = useState<'daily' | 'weekly'>('daily');
+  const [reminderTime, setReminderTime] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -27,6 +28,8 @@ export function EditHabitSheet({ habit, onClose }: Props) {
       setName(habit.name);
       setIcon(habit.icon);
       setFrequency((habit.frequency as 'daily' | 'weekly') || 'daily');
+      const rt = (habit as any).reminder_time as string | null | undefined;
+      setReminderTime(rt ? rt.split(':').slice(0, 2).join(':') : '');
     }
   }, [habit]);
 
@@ -34,7 +37,12 @@ export function EditHabitSheet({ habit, onClose }: Props) {
     if (!habit || !name.trim() || saving) return;
     setSaving(true);
     try {
-      await updateHabit(habit.id, { name: name.trim(), icon, frequency });
+      await updateHabit(habit.id, {
+        name: name.trim(),
+        icon,
+        frequency,
+        reminder_time: reminderTime ? `${reminderTime}:00` : null,
+      } as any);
       onClose();
     } finally {
       setSaving(false);
