@@ -101,6 +101,26 @@ export function AddHabitSheet({ open, onClose }: Props) {
           </div>
         </div>
 
+        <div>
+          <label className="text-sm font-medium mb-2 block">Daily Reminder Time (optional)</label>
+          <input
+            type="time"
+            value={reminderTime}
+            onChange={(e) => setReminderTime(e.target.value)}
+            className="w-full bg-muted rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary h-11"
+          />
+          {reminderTime && (
+            <button
+              type="button"
+              onClick={() => setReminderTime('')}
+              className="text-xs text-muted-foreground mt-1.5 underline"
+            >
+              Clear reminder
+            </button>
+          )}
+        </div>
+
+
         <Button onClick={handleSave} disabled={!name.trim() || saving} className="w-full h-12">
           {saving ? 'Adding…' : 'Add Habit'}
         </Button>
