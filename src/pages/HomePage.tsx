@@ -6,7 +6,8 @@ import { SwipeableCard } from '@/components/SwipeableCard';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
 import { Plus } from 'lucide-react';
 import { NotificationsBell } from '@/components/NotificationsBell';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AddGoalSheet } from '@/components/AddGoalSheet';
 import { EditGoalSheet } from '@/components/EditGoalSheet';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
@@ -27,6 +28,8 @@ export default function HomePage() {
   const { goals, loading: goalsLoading, updateGoal, deleteGoal, refetch: refetchGoals } = useGoals();
   const { logs, addLog, refetch: refetchLogs } = useLogs();
   const { todos } = useTodos();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { profile } = useProfile();
   const { checkAndAwardBadge } = useBadges();
   const { recalcStreak } = useStreakCalculator();
@@ -42,6 +45,21 @@ export default function HomePage() {
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todayTodos = todos.filter((t) => !t.completed).slice(0, 3);
+
+  // Handle notification click routing: /?remind=goal:<id>
+  useEffect(() => {
+    if (goalsLoading) return;
+    const params = new URLSearchParams(location.search);
+    const remind = params.get('remind');
+    if (!remind) return;
+    const [kind, id] = remind.split(':');
+    if (kind === 'goal' && id && goals.some((g) => g.id === id)) {
+      setLogGoalId(id);
+    }
+    // Clear param so it doesn't retrigger
+    navigate('/', { replace: true });
+  }, [location.search, goalsLoading, goals, navigate]);
+
 
   const handleLog = async () => {
     if (!logGoalId) return;

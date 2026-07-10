@@ -15,6 +15,7 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
   const [emoji, setEmoji] = useState('🎯');
   const [type, setType] = useState<'boolean' | 'numeric'>('boolean');
   const [target, setTarget] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +35,8 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
         emoji,
         type,
         target: type === 'numeric' ? Number(target) || 1 : undefined,
-      });
+        reminder_time: reminderTime ? `${reminderTime}:00` : null,
+      } as any);
       if (res?.error === 'duplicate') {
         setError('You already have a goal with this name');
         return;
@@ -44,6 +46,7 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
       setEmoji('🎯');
       setType('boolean');
       setTarget('');
+      setReminderTime('');
       onClose();
     } finally {
       setSaving(false);
@@ -92,6 +95,24 @@ export function AddGoalSheet({ open, onClose }: AddGoalSheetProps) {
               className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary" />
           </div>
         )}
+        <div>
+          <label className="text-sm text-muted-foreground mb-2 block">Daily Reminder Time (optional)</label>
+          <input
+            type="time"
+            value={reminderTime}
+            onChange={(e) => setReminderTime(e.target.value)}
+            className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary"
+          />
+          {reminderTime && (
+            <button
+              type="button"
+              onClick={() => setReminderTime('')}
+              className="text-xs text-muted-foreground mt-1.5 underline"
+            >
+              Clear reminder
+            </button>
+          )}
+        </div>
         <button onClick={handleSave} disabled={saving} className="w-full py-3.5 rounded-lg gradient-primary text-primary-foreground font-semibold tap-target disabled:opacity-50">
           {saving ? 'Creating...' : 'Create Goal'}
         </button>

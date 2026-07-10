@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import HabitsPage from './HabitsPage';
 import WorkoutPage from './WorkoutPage';
 import TodosPage from './TodosPage';
@@ -14,10 +15,21 @@ const chips: { id: Tab; label: string }[] = [
 ];
 
 export default function TrackPage() {
+  const location = useLocation();
   const [active, setActive] = useState<Tab>(() => {
     const stored = sessionStorage.getItem(STORAGE_KEY) as Tab | null;
     return stored && chips.some((c) => c.id === stored) ? stored : 'habits';
   });
+
+  // Force habits tab when arriving from a habit reminder notification.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const remind = params.get('remind');
+    if (remind?.startsWith('habit:')) {
+      setActive('habits');
+      sessionStorage.setItem(STORAGE_KEY, 'habits');
+    }
+  }, [location.search]);
 
   const select = (id: Tab) => {
     setActive(id);

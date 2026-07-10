@@ -17,6 +17,7 @@ export function AddHabitSheet({ open, onClose }: Props) {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('💧');
   const [frequency, setFrequency] = useState<'daily' | 'weekly'>('daily');
+  const [reminderTime, setReminderTime] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +31,12 @@ export function AddHabitSheet({ open, onClose }: Props) {
     setSaving(true);
     setError(null);
     try {
-      const res = await addHabit({ name: trimmed, icon, frequency });
+      const res = await addHabit({
+        name: trimmed,
+        icon,
+        frequency,
+        reminder_time: reminderTime ? `${reminderTime}:00` : null,
+      } as any);
       if (res?.error === 'duplicate') {
         setError('You already have a habit with this name');
         return;
@@ -39,6 +45,7 @@ export function AddHabitSheet({ open, onClose }: Props) {
       setName('');
       setIcon('💧');
       setFrequency('daily');
+      setReminderTime('');
       onClose();
     } finally {
       setSaving(false);
@@ -93,6 +100,26 @@ export function AddHabitSheet({ open, onClose }: Props) {
             ))}
           </div>
         </div>
+
+        <div>
+          <label className="text-sm font-medium mb-2 block">Daily Reminder Time (optional)</label>
+          <input
+            type="time"
+            value={reminderTime}
+            onChange={(e) => setReminderTime(e.target.value)}
+            className="w-full bg-muted rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary h-11"
+          />
+          {reminderTime && (
+            <button
+              type="button"
+              onClick={() => setReminderTime('')}
+              className="text-xs text-muted-foreground mt-1.5 underline"
+            >
+              Clear reminder
+            </button>
+          )}
+        </div>
+
 
         <Button onClick={handleSave} disabled={!name.trim() || saving} className="w-full h-12">
           {saving ? 'Adding…' : 'Add Habit'}

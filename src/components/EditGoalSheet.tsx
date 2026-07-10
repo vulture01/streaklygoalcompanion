@@ -18,6 +18,7 @@ export function EditGoalSheet({ goal, onClose }: Props) {
   const [emoji, setEmoji] = useState('🎯');
   const [type, setType] = useState<'boolean' | 'numeric'>('boolean');
   const [target, setTarget] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -26,6 +27,8 @@ export function EditGoalSheet({ goal, onClose }: Props) {
       setEmoji(goal.emoji);
       setType((goal.type as 'boolean' | 'numeric') || 'boolean');
       setTarget(goal.target ? String(goal.target) : '');
+      const rt = (goal as any).reminder_time as string | null | undefined;
+      setReminderTime(rt ? rt.split(':').slice(0, 2).join(':') : '');
     }
   }, [goal]);
 
@@ -38,7 +41,8 @@ export function EditGoalSheet({ goal, onClose }: Props) {
         emoji,
         type,
         target: type === 'numeric' ? Number(target) || 1 : null,
-      });
+        reminder_time: reminderTime ? `${reminderTime}:00` : null,
+      } as any);
       onClose();
     } finally {
       setSaving(false);
@@ -101,6 +105,24 @@ export function EditGoalSheet({ goal, onClose }: Props) {
             />
           </div>
         )}
+        <div>
+          <label className="text-sm text-muted-foreground mb-2 block">Daily Reminder Time (optional)</label>
+          <input
+            type="time"
+            value={reminderTime}
+            onChange={(e) => setReminderTime(e.target.value)}
+            className="w-full bg-secondary rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-primary"
+          />
+          {reminderTime && (
+            <button
+              type="button"
+              onClick={() => setReminderTime('')}
+              className="text-xs text-muted-foreground mt-1.5 underline"
+            >
+              Clear reminder
+            </button>
+          )}
+        </div>
         <button
           onClick={handleSave}
           disabled={saving || !name.trim()}

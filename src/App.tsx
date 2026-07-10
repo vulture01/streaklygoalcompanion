@@ -7,6 +7,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
 import { CoachFab } from "@/components/CoachFab";
 import { PWAPrompts } from "@/components/PWAPrompts";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
+import { useReminderScheduler } from "@/hooks/useReminders";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useSupabaseData";
 import { useState, useEffect } from "react";
@@ -71,6 +73,12 @@ function AppRoutes() {
     return <UsernameSetupPage onComplete={async () => { await refetch(); }} />;
   }
 
+  return <AuthedApp />;
+}
+
+function AuthedApp() {
+  const location = useLocation();
+  useReminderScheduler();
   return (
     <>
       <DesktopSidebar />
@@ -101,6 +109,7 @@ function AppRoutes() {
       <BottomNav />
       <CoachFab />
       <PWAPrompts />
+      <NotificationPermissionPrompt />
     </>
   );
 }
